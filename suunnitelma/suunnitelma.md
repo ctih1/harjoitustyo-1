@@ -6,15 +6,14 @@ Poista sitten *kaikki* suluilla merkityt kohdat.)
 
 ## Tietoja 
 
-Tekijä: (Etunimi Sukunimi)
+Tekijä: Onni Nevala
 
-Työ git-varaston osoite: <https://gitlab.jyu.fi/anlakane/ohj1ht> (*Korvaa* tämä osoite oman git-varastosi osoitteella)
+Työ git-varaston osoite: https://github.com/ctih1/harjoitustyo-1
+Pelin nimi: Koivuranta simulaattori 2025
 
-Pelin nimi: (Nimi)
+Pelialusta: Windows
 
-Pelialusta: Windows/macOS/Linux (Valitse alusta)
-
-Pelaajien lukumäärä: 1/2/3/4 (Valitse pelaajien lukumäärä)
+Pelaajien lukumäärä: 2
 
 ## Pelin tarina
 
