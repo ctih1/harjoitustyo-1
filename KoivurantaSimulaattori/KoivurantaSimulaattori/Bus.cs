@@ -8,28 +8,44 @@ namespace KoivurantaSimulaattori;
 public class Bus
 {
     private PhysicsObject bus;
+    private Label speedometer;
     private static Bus instance;
     private static readonly int SPEED = 50;
     private static readonly int TURNING_SPEED = 5;
     private static readonly double SLOWDOWN_SPEED = 0.02;
     private static readonly double TURN_SLOWDOWN_SPEED = 0.2;
-    private static readonly int MAX_VELOCITY = 30;
+    private static readonly int MAX_VELOCITY = 80;
 
     private double TurningVelocity = 0;
     private double Velocity = 0;
+    public double SlowdownMultiplier = 1;
     
-    public Bus()
+    public Bus(ScreenView screen)
     {
-        bus = new PhysicsObject(50, 175aaa);
+        bus = new PhysicsObject(50, 175);
         bus.Shape = Shape.Rectangle;
         bus.Color = Color.Yellow;
         instance = this;
+
+        speedometer = new Label();
+        speedometer.Font = Font.DefaultBold;
+        speedometer.Color = Color.Black;
+        speedometer.TextColor = Color.DarkOrange;
+        speedometer.Y = screen.BottomSafe;
+        speedometer.X = screen.LeftSafe + 50;
+        speedometer.Layer = Layer.CreateStaticLayer();
+        
         Timer.CreateAndStart(1.0/60.0, GameLoop);
     }
 
     public PhysicsObject GetObject()
     {
         return this.bus;
+    }
+    
+    public Label GetSpeedo()
+    {
+        return this.speedometer;
     }
 
     public void Forward()
@@ -63,19 +79,21 @@ public class Bus
         if (Velocity < 0.05 && Velocity > -0.05) {
             Velocity = 0;
         } else if (Velocity > 0) {
-            Velocity -= SLOWDOWN_SPEED;
+            Velocity -= SLOWDOWN_SPEED*SlowdownMultiplier;
         } else if (Velocity < 0)
         {
-            Velocity += SLOWDOWN_SPEED;
+            Velocity += SLOWDOWN_SPEED*SlowdownMultiplier;
         }
         
         Velocity = Math.Min(Velocity, MAX_VELOCITY);
-        TurningVelocity = Math.Min(TurningVelocity, 0.3)*(Math.Min(1, Math.Abs((Velocity*100))));
+        TurningVelocity = Math.Min(TurningVelocity, 0.3)*(Math.Min(1, Math.Abs(Velocity*200)));
         bus.Velocity = new Vector(Math.Sin(bus.Angle.Radians), -Math.Cos(bus.Angle.Radians));
         bus.Velocity = bus.Velocity * SPEED * -Velocity;
         
         Angle angle = Angle.FromDegrees(bus.Angle.Degrees + TURNING_SPEED * TurningVelocity);
         bus.Angle = angle;
+        
+        speedometer.Text = string.Format("{0} km/h", Math.Round(Velocity*1.4));
     }
     public void Left()
     {
@@ -90,11 +108,5 @@ public class Bus
     public void SteeringRelease()
     {
         bus.StopAngular();
-    }
-    
-    public static Bus GetInstance()
-    {
-        instance ??= new Bus();
-        return instance;
     }
 }
