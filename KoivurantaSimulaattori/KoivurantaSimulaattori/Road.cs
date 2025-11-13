@@ -13,26 +13,30 @@ public class Road
     public List<GameObject> segments = new List<GameObject>();
     public Bus bus = null;
     public PhysicsObject busObject = null;
-    private Image roadTexture;
+    private static readonly int TERRAIN_PIECES = 1000;
+    private bool loaded = false;
 
-    public Road(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn)
+    public void GenerateRoad(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn)
     {
-        roadTexture = roadSegmentTexture;
         int currentRotation = 0;
         int currentX = 0;
         int currentY = -SIZE ;
         int stepsFromLastTurn = 0;
         int nextRotation = 0;
         int stepsUntilTurn = -1;
-        
-        for (int i = 0; i < 300; i++)
+        int minSteps = 15;
+
+
+        for (int i=0; i<TERRAIN_PIECES; i++)
         {
             stepsFromLastTurn++;
-            if (RandomNumberGenerator.GetInt32(0, 3) == 2 && stepsFromLastTurn > 30 && stepsUntilTurn != 0)
+            if (stepsFromLastTurn > minSteps && stepsUntilTurn != 0 && RandomNumberGenerator.GetInt32(0, 10) == 1)
             {
-                GameObject sign = new GameObject(128, 128);
-                sign.X = currentX;
-                sign.Y = currentY;
+                GameObject sign = new GameObject(256, 256);
+                sign.X = currentX + 256;
+                sign.Y = currentY + 256;
+                minSteps = RandomNumberGenerator.GetInt32(15, 45);
+
                 if (i % 2 == 0)
                 {
                     nextRotation -= 90;
@@ -49,12 +53,19 @@ public class Road
                     nextRotation = 0;
                 }
 
+                if (nextRotation == 180)
+                {
+                    minSteps = 12;
+                }
+
                 if (nextRotation < 0)
                 {
-                    nextRotation = 360 -Math.Abs(nextRotation);
+                    nextRotation = 360 - Math.Abs(nextRotation);
                 }
+
                 stepsFromLastTurn = 0;
                 stepsUntilTurn = 15;
+
                 gameInstance.Add(sign);
             }
 
@@ -62,11 +73,10 @@ public class Road
             if (stepsUntilTurn == 0)
             {
                 currentRotation = nextRotation;
-                nextRotation = 0;
             }
+
             GameObject roadSegment = new GameObject(SIZE, SIZE);
             roadSegment.Image = roadSegmentTexture;
-            roadSegment.Image.Scaling = ImageScaling.Nearest;
 
             switch (currentRotation)
             {
@@ -91,14 +101,17 @@ public class Road
 
             roadSegment.Color = Color.Black;
             segments.Add(roadSegment);
-            
+
             gameInstance.Add(roadSegment, -3);
         }
+
+        loaded = true;
     }
 
     public async void PhysicsUpdate(Camera Camera, ScreenView Screen)
     {
         bool isOnRoad = false;
+        if (!loaded) return;
         foreach (GameObject piece in segments)
         {
             if(bus == null) return;

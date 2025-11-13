@@ -19,6 +19,7 @@ public class Bus
     private double TurningVelocity = 0;
     private double Velocity = 0;
     public double SlowdownMultiplier = 1;
+    private bool handbrakePressed = false;
     
     public Bus(ScreenView screen)
     {
@@ -34,8 +35,6 @@ public class Bus
         speedometer.Y = screen.BottomSafe;
         speedometer.X = screen.LeftSafe + 50;
         speedometer.Layer = Layer.CreateStaticLayer();
-        
-        Timer.CreateAndStart(1.0/60.0, GameLoop);
     }
 
     public PhysicsObject GetObject()
@@ -66,7 +65,26 @@ public class Bus
         
     }
 
-    private void GameLoop()
+
+    public void Handbrake()
+    {
+        handbrakePressed = true;
+        if (Velocity > 0)
+        {
+            Velocity -= 0.4;
+        }
+        else
+        {
+            Velocity += 0.4;
+        }
+    }
+
+    public void HandbrakeRelease()
+    {
+        handbrakePressed = false;
+    }
+
+    public void GameLoop()
     {
         if (TurningVelocity < 0.15 && TurningVelocity > -0.15) {
             TurningVelocity = 0;
@@ -86,7 +104,7 @@ public class Bus
         }
         
         Velocity = Math.Min(Velocity, MAX_VELOCITY);
-        TurningVelocity = Math.Min(TurningVelocity, 0.3)*(Math.Min(1, Math.Abs(Velocity*200)));
+        TurningVelocity = Math.Min(TurningVelocity, 0.3)*Math.Min(1, Math.Abs(Velocity*200))*(!handbrakePressed).GetHashCode();
         bus.Velocity = new Vector(Math.Sin(bus.Angle.Radians), -Math.Cos(bus.Angle.Radians));
         bus.Velocity = bus.Velocity * SPEED * -Velocity;
         
