@@ -4,7 +4,7 @@
 tiedostoa tekstieditorissa. Käytä [Markdown-syntaksia](https://about.gitlab.com/handbook/markdown-guide/).
 Poista sitten *kaikki* suluilla merkityt kohdat.)
 
-## Tietoja 
+## Tietoja
 
 Tekijä: Onni Nevala
 
@@ -17,8 +17,8 @@ Pelaajien lukumäärä: 1
 
 ## Pelin tarina
 
-Pelissä ajetaan bussilla ja otetaan matkustajia pysäkeiltä. Bussin pitää pysyä aikataulussa, jotta pelaaja saisit täydet pisteet. Pelaajan pitää myös noudattaa liikennesääntöjä, ja hallita bussin sisäisiä tapahtumia.
-
+Pelissä ajetaan bussilla ja otetaan matkustajia pysäkeiltä. Bussin pitää pysyä aikataulussa, jotta pelaaja saisi täydet pisteet. Pelaajan pitää myös noudattaa liikennesääntöjä, ja hallita bussin sisäisiä tapahtumia.
+  
 ## Pelin idea ja tavoitteet
 
 Pelin idea on ajaa bussilla ympäri satunnaisesti luotua karttaa, ja kerätä pisteitä tekemällä erilaisia tehtäviä
