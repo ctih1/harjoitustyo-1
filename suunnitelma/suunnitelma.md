@@ -13,21 +13,21 @@ Pelin nimi: Koivuranta simulaattori 2025
 
 Pelialusta: Windows
 
-Pelaajien lukumäärä: 2
+Pelaajien lukumäärä: 1
 
 ## Pelin tarina
 
-(Pelin tarina.)
+Pelissä ajetaan bussilla ja otetaan matkustajia pysäkeiltä. Bussin pitää pysyä aikataulussa, jotta pelaaja saisit täydet pisteet. Pelaajan pitää myös noudattaa liikennesääntöjä, ja hallita bussin sisäisiä tapahtumia.
 
 ## Pelin idea ja tavoitteet
 
-(Pelin idea ja tavoitteet.)
+Pelin idea on ajaa bussilla ympäri satunnaisesti luotua karttaa, ja kerätä pisteitä tekemällä erilaisia tehtäviäö
 
 ## Hahmotelma pelistä
 
 (Kun olet lisännyt suunnitelmakuvan tähän hakemistoon, linkitä se tähän alle. Alla on esimerkkikuvan linkitys.)
 
-![Esimerkkikuva](esimerkkikuva.png "Esimerkkikuva")
+![Kuva bussista](bussikuva.png "Kuva bussista")
 
 ## Toteutuksen suunnitelma
 
