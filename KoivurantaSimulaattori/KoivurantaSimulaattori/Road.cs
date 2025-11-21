@@ -16,6 +16,8 @@ public class Road
     public PhysicsObject busObject = null;
     private static readonly int TERRAIN_PIECES = 1000;
     private bool loaded = false;
+    private static readonly int TURN_PIECES = 15;
+    private static readonly int TURN_SAFESPACE = 50;
 
     public void GenerateRoad(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn)
     {
@@ -26,6 +28,7 @@ public class Road
         int nextRotation = 0;
         int stepsUntilTurn = -1;
         int minSteps = -1;
+        int rotationDirection = 0;
 
 
         for (int i=0; i<TERRAIN_PIECES; i++)
@@ -40,7 +43,7 @@ public class Road
 
                 if (i % 2 == 0)
                 {
-                    nextRotation += 90;
+                    nextRotation -= 90;
                     sign.Image = leftTurn;
                 }
                 else
@@ -54,18 +57,8 @@ public class Road
                     nextRotation = 0;
                 }
 
-                if (nextRotation == 180)
-                {
-                    minSteps = 12;
-                }
-
-                if (nextRotation < 0)
-                {
-                    nextRotation = 360 - Math.Abs(nextRotation);
-                }
-
                 stepsFromLastTurn = 0;
-                stepsUntilTurn = 15;
+                stepsUntilTurn = 8;
 
                 gameInstance.Add(sign);
             }
@@ -73,9 +66,9 @@ public class Road
             stepsUntilTurn--;
             if (stepsUntilTurn == 0)
             {
-                for (int j=0; j<10; j++)
+                for (int j=TURN_PIECES; j>0; j--)
                 {
-                    double angle = j * (nextRotation / 10.0);
+                    double angle = j * (nextRotation / (double)TURN_PIECES);
                     double rad = angle * Math.PI / 180.0;
                     GameObject rotationPiece = new GameObject(SIZE, SIZE);
                     rotationPiece.Angle = Angle.FromDegrees(angle+90);
@@ -83,12 +76,21 @@ public class Road
                     double a = SIZE * Math.Cos(rad);
                     double b = SIZE * Math.Sin(rad);
 
-                    rotationPiece.X = segments.Last().X + a;
+                    rotationPiece.X =  segments.Last().X + a;
                     rotationPiece.Y = segments.Last().Y + b;
-                    
-                    rotationPiece.Image = roadSegmentTexture;
+
+                    rotationPiece.Color = Color.Lighter(Color.Black, (int)(j / (double)TURN_PIECES * 255));
                     segments.Add(rotationPiece);
-                    gameInstance.Add(rotationPiece);
+                    Label dbgLabel = new Label(angle + " #" + j + " / "  + nextRotation);
+                    dbgLabel.X = rotationPiece.X;
+                    dbgLabel.Y = rotationPiece.Y;
+                    dbgLabel.TextColor = Color.Red;
+                    dbgLabel.Size = new Vector(50, 50);
+                    dbgLabel.TextScale = new Vector(4, 4);
+                    gameInstance.Add(dbgLabel, 2);
+                    gameInstance.Add(rotationPiece, -2);
+                    currentY += (int)b;
+                    currentX += (int)a;
                 }
                 currentRotation = nextRotation;
             }
