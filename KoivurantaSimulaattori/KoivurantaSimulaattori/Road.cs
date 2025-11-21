@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Jypeli;
@@ -24,13 +25,13 @@ public class Road
         int stepsFromLastTurn = 0;
         int nextRotation = 0;
         int stepsUntilTurn = -1;
-        int minSteps = 15;
+        int minSteps = -1;
 
 
         for (int i=0; i<TERRAIN_PIECES; i++)
         {
             stepsFromLastTurn++;
-            if (stepsFromLastTurn > minSteps && stepsUntilTurn != 0 && RandomNumberGenerator.GetInt32(0, 10) == 1)
+            if (stepsFromLastTurn > minSteps && stepsUntilTurn != 0 && RandomNumberGenerator.GetInt32(0, 2) == 1)
             {
                 GameObject sign = new GameObject(256, 256);
                 sign.X = currentX + 256;
@@ -39,7 +40,7 @@ public class Road
 
                 if (i % 2 == 0)
                 {
-                    nextRotation -= 90;
+                    nextRotation += 90;
                     sign.Image = leftTurn;
                 }
                 else
@@ -72,6 +73,23 @@ public class Road
             stepsUntilTurn--;
             if (stepsUntilTurn == 0)
             {
+                for (int j=0; j<10; j++)
+                {
+                    double angle = j * (nextRotation / 10.0);
+                    double rad = angle * Math.PI / 180.0;
+                    GameObject rotationPiece = new GameObject(SIZE, SIZE);
+                    rotationPiece.Angle = Angle.FromDegrees(angle+90);
+                    
+                    double a = SIZE * Math.Cos(rad);
+                    double b = SIZE * Math.Sin(rad);
+
+                    rotationPiece.X = segments.Last().X + a;
+                    rotationPiece.Y = segments.Last().Y + b;
+                    
+                    rotationPiece.Image = roadSegmentTexture;
+                    segments.Add(rotationPiece);
+                    gameInstance.Add(rotationPiece);
+                }
                 currentRotation = nextRotation;
             }
 
@@ -83,12 +101,10 @@ public class Road
                 case 90:
                     currentX += SIZE;
                     break;
-                case 180:
-                    currentY -= SIZE;
-                    break;
                 case 270:
                     currentX -= SIZE;
                     break;
+                case 180:
                 case 0:
                     currentY += SIZE;
                     break;

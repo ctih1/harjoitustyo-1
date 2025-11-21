@@ -14,7 +14,7 @@ public class Bus
     private static readonly int TURNING_SPEED = 5;
     private static readonly double SLOWDOWN_SPEED = 0.02;
     private static readonly double TURN_SLOWDOWN_SPEED = 0.2;
-    private static readonly int MAX_VELOCITY = 80;
+    private static readonly int MAX_VELOCITY = 800;
 
     private double TurningVelocity = 0;
     private double Velocity = 0;

@@ -40,7 +40,7 @@ public class KoivurantaSimulaattori : PhysicsGame
         Keyboard.Listen(Key.Space, ButtonState.Down, bus.Handbrake, "Hand brake");
         Keyboard.Listen(Key.Space, ButtonState.Released, bus.HandbrakeRelease, "Hand brake");
         
-        Camera.ZoomFactor = 0.5;
+        Camera.ZoomFactor = 0.3;
         Camera.FollowedObject = bus.GetObject();
         Task.Run(() => road.GenerateRoad(this, roadTexture, leftSign, rightSign));
     }
