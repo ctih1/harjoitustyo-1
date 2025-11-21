@@ -21,11 +21,9 @@ Pelissä ajetaan bussilla ja otetaan matkustajia pysäkeiltä. Bussin pitää py
 
 ## Pelin idea ja tavoitteet
 
-Pelin idea on ajaa bussilla ympäri satunnaisesti luotua karttaa, ja kerätä pisteitä tekemällä erilaisia tehtäviäö
+Pelin idea on ajaa bussilla ympäri satunnaisesti luotua karttaa, ja kerätä pisteitä tekemällä erilaisia tehtäviä
 
 ## Hahmotelma pelistä
-
-(Kun olet lisännyt suunnitelmakuvan tähän hakemistoon, linkitä se tähän alle. Alla on esimerkkikuvan linkitys.)
 
 ![Kuva bussista](bussikuva.png "Kuva bussista")
 
