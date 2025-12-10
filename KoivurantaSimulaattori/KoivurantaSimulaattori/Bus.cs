@@ -10,8 +10,8 @@ public class Bus
     private PhysicsObject bus;
     private Label speedometer;
     private static Bus instance;
-    private static readonly int SPEED = 50;
-    private static readonly int TURNING_SPEED = 5;
+    private static readonly int SPEED = 500;
+    private static readonly int TURNING_SPEED = 25;
     private static readonly double SLOWDOWN_SPEED = 0.02;
     private static readonly double TURN_SLOWDOWN_SPEED = 0.2;
     private static readonly int MAX_VELOCITY = 800;

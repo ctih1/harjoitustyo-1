@@ -25,11 +25,10 @@ public class Road
         int currentX = 0;
         int currentY = -SIZE ;
         int stepsFromLastTurn = 0;
-        int nextRotation = 0;
         int stepsUntilTurn = -1;
         int minSteps = -1;
         int rotationDirection = 0;
-
+        string turningDirection = "";
 
         for (int i=0; i<TERRAIN_PIECES; i++)
         {
@@ -43,20 +42,15 @@ public class Road
 
                 if (i % 2 == 0)
                 {
-                    nextRotation -= 90;
+                    turningDirection = "left";
                     sign.Image = leftTurn;
                 }
                 else
                 {
-                    nextRotation += 90;
+                    turningDirection = "right";
                     sign.Image = rightTurn;
                 }
-
-                if (nextRotation >= 360)
-                {
-                    nextRotation = 0;
-                }
-
+                
                 stepsFromLastTurn = 0;
                 stepsUntilTurn = 8;
 
@@ -66,67 +60,105 @@ public class Road
             stepsUntilTurn--;
             if (stepsUntilTurn == 0)
             {
-                for (int j=TURN_PIECES; j>0; j--)
+                for (int x=0; x<TURN_PIECES; x++)
                 {
-                    double angle = j * (nextRotation / (double)TURN_PIECES);
+                    int j = x;
+
+                    if (currentRotation == 0 || currentRotation == 180)
+                    {
+                        j = TURN_PIECES - x;
+                    }
+
+                    double angle = j * (90 / (double)TURN_PIECES);
                     double rad = angle * Math.PI / 180.0;
-                    GameObject rotationPiece = new GameObject(SIZE, SIZE);
-                    rotationPiece.Angle = Angle.FromDegrees(angle+90);
                     
                     double a = SIZE * Math.Cos(rad);
                     double b = SIZE * Math.Sin(rad);
-
+                    
+                    GameObject rotationPiece = new GameObject(SIZE, SIZE);
+                    rotationPiece.Angle = Angle.FromDegrees(angle+90);
                     rotationPiece.X =  segments.Last().X + a;
                     rotationPiece.Y = segments.Last().Y + b;
-
                     rotationPiece.Color = Color.Lighter(Color.Black, (int)(j / (double)TURN_PIECES * 255));
                     segments.Add(rotationPiece);
-                    Label dbgLabel = new Label(angle + " #" + j + " / "  + nextRotation);
+                    
+                    Label dbgLabel = new Label(angle + " #" + j + " / "  + 90 + turningDirection);
                     dbgLabel.X = rotationPiece.X;
                     dbgLabel.Y = rotationPiece.Y;
                     dbgLabel.TextColor = Color.Red;
                     dbgLabel.Size = new Vector(50, 50);
                     dbgLabel.TextScale = new Vector(4, 4);
+                    
                     gameInstance.Add(dbgLabel, 2);
                     gameInstance.Add(rotationPiece, -2);
+                    
                     currentY += (int)b;
                     currentX += (int)a;
                 }
-                currentRotation = nextRotation;
+
+                if (turningDirection == "left") {
+                    currentRotation -= 90;
+                } else {
+                    currentRotation += 90;
+                }
+
+                if (currentRotation > 360)
+                {
+                    currentRotation = 360 - currentRotation;
+                } else if (currentRotation < 0)
+                {
+                    currentRotation = 360 + currentRotation;
+                }
+
+                if (currentRotation == 270)
+                {
+                    currentRotation = 90;
+                }
+
             }
 
             GameObject roadSegment = new GameObject(SIZE, SIZE);
             roadSegment.Image = roadSegmentTexture;
-
+            
             switch (currentRotation)
             {
                 case 90:
                     currentX += SIZE;
                     break;
+                               
+                case 0:
+                case 180:
+                    currentY += SIZE;
+                    break;
+                
                 case 270:
                     currentX -= SIZE;
                     break;
-                case 180:
-                case 0:
-                    currentY += SIZE;
-                    break;
+
             }
 
             roadSegment.X = currentX;
             roadSegment.Y = currentY;
 
             roadSegment.Angle = Angle.FromDegrees(currentRotation);
-
+            
+            Label roadDbgLabel = new Label(currentRotation + " #" + i);
+            roadDbgLabel.X = roadSegment.X;
+            roadDbgLabel.Y = roadSegment.Y;
+            roadDbgLabel.TextColor = Color.Red;
+            roadDbgLabel.Size = new Vector(50, 50);
+            roadDbgLabel.TextScale = new Vector(4, 4);
+            
             roadSegment.Color = Color.Black;
             segments.Add(roadSegment);
-
+            gameInstance.Add(roadDbgLabel, -2);
             gameInstance.Add(roadSegment, -3);
         }
 
         loaded = true;
     }
 
-    public async void PhysicsUpdate(Camera Camera, ScreenView Screen)
+    public void PhysicsUpdate(Camera Camera, ScreenView Screen)
     {
         bool isOnRoad = false;
         if (!loaded) return;
