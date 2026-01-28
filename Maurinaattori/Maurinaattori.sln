@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maurinaattori", "Maurinaattori\Maurinaattori.csproj", "{AE3F3DBB-D73B-49B2-B57A-13AEF65B93CE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AE3F3DBB-D73B-49B2-B57A-13AEF65B93CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE3F3DBB-D73B-49B2-B57A-13AEF65B93CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE3F3DBB-D73B-49B2-B57A-13AEF65B93CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE3F3DBB-D73B-49B2-B57A-13AEF65B93CE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

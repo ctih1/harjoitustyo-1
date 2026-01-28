@@ -50,6 +50,5 @@ public class KoivurantaSimulaattori : PhysicsGame
         new Task(() => road.PhysicsUpdate(Camera, Screen)).Start();
         base.Update(Time);
         bus.GameLoop();
-        
     }
 }
