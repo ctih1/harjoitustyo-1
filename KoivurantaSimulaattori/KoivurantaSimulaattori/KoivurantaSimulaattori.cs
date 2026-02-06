@@ -19,15 +19,20 @@ public class KoivurantaSimulaattori : PhysicsGame
     private Road road;
     private Thread roadThread;
     private Bus bus;
+    private Logger logger;
     public override void Begin()
     {
+        logger = new Logger("main");
+        logger.Debug("AUTA MINUA");
         Image roadTexture = LoadImage("road");
         Image leftSign = LoadImage("left");
         Image rightSign = LoadImage("right");
         
         road = new Road();
         bus = new Bus(Screen);
-        Add(bus.GetObject());
+        PhysicsObject busObject = this.bus.GetObject();
+        
+        Add(busObject);
         Add(bus.GetSpeedo());
         road.LoadBus(bus);
         
@@ -41,8 +46,8 @@ public class KoivurantaSimulaattori : PhysicsGame
         Keyboard.Listen(Key.Space, ButtonState.Released, bus.HandbrakeRelease, "Hand brake");
         
         Camera.ZoomFactor = 0.3;
-        Camera.FollowedObject = bus.GetObject();
-        Task.Run(() => road.GenerateRoad(this, roadTexture, leftSign, rightSign));
+        Camera.FollowedObject = busObject;
+        Task.Run(() => road.GenerateAll(this, roadTexture, leftSign, rightSign));
     }
 
     protected override void Update(Time time)

@@ -15,6 +15,7 @@ public class Bus
     private static readonly double SLOWDOWN_SPEED = 0.02;
     private static readonly double TURN_SLOWDOWN_SPEED = 0.2;
     private static readonly int MAX_VELOCITY = 800;
+    private static Logger logger = new Logger("bus.cs");
 
     private double TurningVelocity = 0;
     private double Velocity = 0;
@@ -23,6 +24,7 @@ public class Bus
     
     public Bus(ScreenView screen)
     {
+        logger.Info("Creating bus");
         bus = new PhysicsObject(50, 175);
         bus.Shape = Shape.Rectangle;
         bus.Color = Color.Yellow;
@@ -39,11 +41,13 @@ public class Bus
 
     public PhysicsObject GetObject()
     {
+        logger.Info("Returning bus");
         return this.bus;
     }
     
     public Label GetSpeedo()
     {
+        logger.Info("Returning speedo");
         return this.speedometer;
     }
 
@@ -54,6 +58,7 @@ public class Bus
 
     public void Brake()
     {
+        logger.Debug("Breaking");
         if (Velocity > 0)
         {
             Velocity -= 0.2;
@@ -68,6 +73,7 @@ public class Bus
 
     public void Handbrake()
     {
+        logger.Debug("Handbrake actiavted");
         handbrakePressed = true;
         if (Velocity > 0)
         {
@@ -81,6 +87,7 @@ public class Bus
        
     public void HandbrakeRelease()
     {
+        logger.Debug("Handbrake released");
         handbrakePressed = false;
     }
 
