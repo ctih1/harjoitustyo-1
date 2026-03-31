@@ -24,7 +24,6 @@ public class Logger
         string text = String.Format("[{0}:{1}]: {2}\n", level.ToUpper(), name, message);
         lines.Add(text);
         
-        File.AppendAllText(logPath, text);
     }
 
     public void Debug(string message)

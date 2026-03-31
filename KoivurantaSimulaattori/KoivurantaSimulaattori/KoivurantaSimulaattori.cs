@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Security.Authentication.ExtendedProtection;
 using System.Threading;
 using System.Threading.Tasks;
 using Jypeli;
@@ -12,7 +14,6 @@ namespace KoivurantaSimulaattori;
 /// @author gr313123
 /// @version 12.11.2025
 /// <summary>
-/// 
 /// </summary>
 public class KoivurantaSimulaattori : PhysicsGame
 {
@@ -20,6 +21,8 @@ public class KoivurantaSimulaattori : PhysicsGame
     private Thread roadThread;
     private Bus bus;
     private Logger logger;
+    private Label label;
+    
     public override void Begin()
     {
         logger = new Logger("main");
@@ -27,15 +30,26 @@ public class KoivurantaSimulaattori : PhysicsGame
         Image roadTexture = LoadImage("road");
         Image leftSign = LoadImage("left");
         Image rightSign = LoadImage("right");
+        Image busSign = LoadImage("stopsign");
+        Image busZone = LoadImage("busstop");
+        Image busStop = LoadImage("stop");
+        
+        UI gameUi = new UI(this, Screen, busStop);
+        
+        busSign.Scaling = ImageScaling.Nearest;
+        busZone.Scaling = ImageScaling.Nearest;
+        
+        label = new Label("fps");
+        label.Position = new Vector(Screen.LeftSafe + 20, Screen.TopSafe - 100);
+        Add(label);
         
         road = new Road();
         bus = new Bus(Screen);
-        PhysicsObject busObject = this.bus.GetObject();
-        
+        PhysicsObject busObject = bus.GetObject();
         Add(busObject);
-        Add(bus.GetSpeedo());
-        road.LoadBus(bus);
+        int stopIndex = 0;
         
+        road.LoadBus(bus);
         Keyboard.Listen(Key.W, ButtonState.Down, bus.Forward, "Drives forward");
         Keyboard.Listen(Key.A, ButtonState.Down, bus.Left, "Steer left");
         Keyboard.Listen(Key.S, ButtonState.Down, bus.Brake, "Brake");
@@ -44,16 +58,28 @@ public class KoivurantaSimulaattori : PhysicsGame
         Keyboard.Listen(Key.A, ButtonState.Released, bus.SteeringRelease, "Steer right");
         Keyboard.Listen(Key.Space, ButtonState.Down, bus.Handbrake, "Hand brake");
         Keyboard.Listen(Key.Space, ButtonState.Released, bus.HandbrakeRelease, "Hand brake");
-        
+        Keyboard.Listen(Key.Enter, ButtonState.Pressed,
+            () => { bus.GetObject().Position = road.stops[stopIndex].Position;
+                stopIndex++;    
+            }, "");
+        ControllerOne.ListenAnalog(AnalogControl.LeftStick, 1.0/1000000000000000, bus.StickMove, "Steer");
+        ControllerOne.ListenAnalog(AnalogControl.RightTrigger, 0.00001, bus.TriggerAccel, "Gas!");
+        ControllerOne.Listen(Button.RightShoulder, ButtonState.Down, bus.Handbrake, "Hand brake");
+        ControllerOne.Listen(Button.RightShoulder, ButtonState.Up, bus.HandbrakeRelease, "Release");
         Camera.ZoomFactor = 0.3;
         Camera.FollowedObject = busObject;
-        Task.Run(() => road.GenerateAll(this, roadTexture, leftSign, rightSign));
+        road.GenerateAll(this, roadTexture, leftSign, rightSign, busZone, busSign);
     }
 
     protected override void Update(Time time)
     {
-        new Task(() => road.PhysicsUpdate(Camera, Screen)).Start();
+        Stopwatch sw = Stopwatch.StartNew();
+        road.PhysicsUpdate(Camera, Screen);
         base.Update(Time);
         bus.GameLoop();
+        sw.Stop();
+        Console.WriteLine(("frametime " + sw.ElapsedMilliseconds));
+        double fps = Math.Round(1 / (sw.Elapsed.TotalMilliseconds / 1000));
+        label.Text = fps + "fps";
     }
 }

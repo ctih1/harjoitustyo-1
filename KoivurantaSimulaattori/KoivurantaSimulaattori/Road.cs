@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
-using FarseerPhysics.Collision;
 using Jypeli;
-using Silk.NET.OpenGL;
 
 namespace KoivurantaSimulaattori;
 
@@ -13,22 +12,22 @@ public class Road
 {
     private static bool debug = false;
     private static readonly int SIZE = 400;
-    public List<GameObject> segments = new List<GameObject>();
-    public List<GameObject> stops = new List<GameObject>();
-    public Bus bus = null;
-    public PhysicsObject busObject = null;
+    public readonly List<GameObject> segments = new List<GameObject>();
+    public readonly List<GameObject> stops = new List<GameObject>();
+    public readonly List<GameObject> stopZones = new List<GameObject>();
+    public Bus bus;
+    public PhysicsObject busObject;
     private static readonly int TERRAIN_PIECES = 4000;
-    private bool loaded = false;
+    private bool loaded;
     private static readonly int TURN_PIECES = 15;
-    private static readonly int TURN_SAFESPACE = 50;
     private static readonly int BUS_STOPS = 20;
-    private static Logger logger = new Logger("road.cs");
+    private static readonly Logger logger = new Logger("road.cs");
 
-    public void GenerateAll(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn)
+    public void GenerateAll(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn, Image stopArea, Image stopSign)
     {
         logger.Info("Creating everything");
         GenerateRoad(gameInstance, roadSegmentTexture, leftTurn, rightTurn);
-        GenerateStops(gameInstance);
+        GenerateStops(gameInstance, stopSign, stopArea);
     }
     public void GenerateRoad(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn)
     {
@@ -39,7 +38,6 @@ public class Road
         int stepsFromLastTurn = 0;
         int stepsUntilTurn = -1;
         int minSteps = -1;
-        int rotationDirection = 0;
         string turningDirection = "";
 
         for (int i=0; i<TERRAIN_PIECES; i++)
@@ -136,6 +134,10 @@ public class Road
                     currentRotation = 360 + currentRotation;
                 }
 
+                if (currentRotation == 180)
+                {
+                    currentRotation = 0;
+                }
                 if (currentRotation == 270)
                 {
                     currentRotation = 90;
@@ -153,12 +155,7 @@ public class Road
                     break;
                                
                 case 0:
-                case 180:
                     currentY += SIZE;
-                    break;
-                
-                case 270:
-                    currentX -= SIZE;
                     break;
 
             }
@@ -187,59 +184,114 @@ public class Road
         loaded = true;
     }
 
-    public void GenerateStops(PhysicsGame instance)
+    public void GenerateStops(PhysicsGame instance, Image sign, Image zone)
     {
         logger.Debug("Generating bus stop");
 
-        GameObject test = new GameObject(50, 50);
-        test.Shape = Shape.Rectangle;
-        test.Color = Color.Green;
-        test.Position = new Vector(0, 0);
-
-        instance.Add(test);
-        
-;        HashSet<int> usedRoads = new HashSet<int>();
+        HashSet<int> usedRoads = new HashSet<int>();
         for (int i = 0; i < BUS_STOPS; i++)
         {
-            GameObject stop = new GameObject(50, 50);
+            (int w, int h) = (256, 256);
+            GameObject stop = new GameObject(w,h);
             stop.Shape = Shape.Rectangle;
-            stop.Color = Color.Green;
+            stop.Image = sign;
 
+            GameObject stopZone = new GameObject(w * 2, h * 2);
+            stopZone.Shape = Shape.Rectangle;
+            stopZone.Image = zone;
+            stopZone.Tag = i;
+            
             int targetRoad = RandomNumberGenerator.GetInt32(0, segments.Count);
             while (usedRoads.Contains(targetRoad))
             {
                 targetRoad =  RandomNumberGenerator.GetInt32(0, segments.Count);
             }
 
-            stop.Position = segments[targetRoad].Position.RightNormal;
+            GameObject road = segments[targetRoad];
+            Vector position;
+
+            int offset = 256;
+
+            int offsetAngle = 0;
+
+            if (road.Angle.Equals(Angle.FromDegrees(0)))
+            {
+                position = new Vector(road.Position.X + SIZE / 2.0 * Math.Cos(road.Angle.Radians) + offset ,
+                    road.Position.Y + SIZE / 2.0 * Math.Sin(road.Angle.Radians));
+            }
+            else
+            {
+                offset -= 64;
+                position = new Vector(road.Position.X + offset - SIZE/2.0  * Math.Cos(road.Angle.Radians),
+                    road.Position.Y - offset - SIZE/2.0  * Math.Sin(road.Angle.Radians));
+                offsetAngle = 180;
+            }
+
             usedRoads.Add(targetRoad);
             
+            stop.Position = position;
+            
+            stopZone.Position = stop.Position;
+            stopZone.Angle = road.Angle + Angle.FromDegrees(offsetAngle);
+            
+            stopZones.Add(stopZone);
             stops.Add(stop);
-            instance.Add(stop);
+            instance.Add(stopZone, -1);
+            instance.Add(stop, 1);
         }
+    }
+
+    public bool Overlapping(double right, double left, double top, double down, GameObject comparison)
+    {
+        return right > comparison.Left && left < comparison.Right && top > comparison.Bottom && down < comparison.Top;
     }
 
     public void PhysicsUpdate(Camera Camera, ScreenView Screen)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         if (!loaded) return;
         bool isOnRoad = false;
+        bool onStop = false;
+        
+        if(bus == null) return;
+
+        double busLeft = busObject.Left;
+        double busRight = busObject.Right;
+        double busTop = busObject.Top;
+        double busDown = busObject.Bottom;
+        
         foreach (GameObject piece in segments)
         {
-            if(bus == null) return;
-            if (busObject.Right > piece.Left && busObject.Left < piece.Right && busObject.Top > piece.Bottom && busObject.Bottom < piece.Top)
+            if (Overlapping(busRight, busLeft, busTop, busDown, piece))
             {
                 isOnRoad = true;
+                Console.WriteLine("road ");
+                break;
+            }
+        }
+
+        foreach (GameObject stopZone in stopZones)
+        {
+            if (Overlapping(busRight, busLeft, busTop, busDown, stopZone))
+            {
+                onStop = true;
+                busObject.Color = Color.Green;
+                Console.WriteLine("STOPP!");
             }
         }
 
         if (isOnRoad)
         {
             bus.SlowdownMultiplier = 1;
-            bus.GetObject().Color = Color.Yellow;
+            busObject.Color = Color.Yellow;
         } else {
             bus.SlowdownMultiplier = 3;
-            bus.GetObject().Color = Color.Red;
+            busObject.Color = Color.Red;
         }
+        
+        sw.Stop();
+        
+        Console.WriteLine("ELAPSED ROAD " + sw.ElapsedMilliseconds + "ms");
     }
 
     public void LoadBus(Bus bus)
@@ -248,5 +300,4 @@ public class Road
         this.bus = bus;
         this.busObject = bus.GetObject();
     }
-    
 }
