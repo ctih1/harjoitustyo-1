@@ -11,7 +11,8 @@ public class UI
     public Label debugLabel;
     private Label stopMark;
     private Label distanceToStop;
-    
+    private Label stopTime;
+
     private static UI instance;
 
     private Label CreateLabel(double x, double y)
@@ -29,33 +30,36 @@ public class UI
     }
 
     public UI(PhysicsGame game, Image busStop)
-        {
-            ScreenView screen = Game.Screen;
+    {
+        ScreenView screen = Game.Screen;
             
-            speedometer = CreateLabel(screen.LeftSafe + 50, screen.BottomSafe);
-            passangerCount = CreateLabel(screen.LeftSafe + 50, screen.BottomSafe);
-            debugLabel = CreateLabel(screen.LeftSafe + 50, screen.TopSafe + 50);
-            debugLabel.Width = 500;
-            
-            stopMark = new Label();
-            stopMark.Image = busStop;
-            stopMark.Image.Scaling = ImageScaling.Nearest;
-            stopMark.Size = new Vector(200, 62);
-            stopMark.X = 0;
-            stopMark.Y = screen.TopSafe-62;
+        speedometer = CreateLabel(screen.LeftSafe + 50, screen.BottomSafe);
+        passangerCount = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 300);
+        debugLabel = CreateLabel(screen.LeftSafe + 50, screen.TopSafe -  100);
+        stopTime = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 200);
 
-            distanceToStop = CreateLabel(screen.RightSafe - 100, screen.TopSafe - 20);
+        debugLabel.Width = 500;
             
-            HideStop();
+        stopMark = new Label();
+        stopMark.Image = busStop;
+        stopMark.Image.Scaling = ImageScaling.Nearest;
+        stopMark.Size = new Vector(200, 62);
+        stopMark.X = 0;
+        stopMark.Y = screen.TopSafe-62;
+
+        distanceToStop = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 400);
             
-            game.Add(speedometer);
-            game.Add(debugLabel);
-            game.Add(passangerCount);
-            game.Add(stopMark);
-            game.Add(distanceToStop);
+        HideStop();
             
-            instance = this;
-        }
+        game.Add(speedometer);
+        game.Add(debugLabel);
+        game.Add(passangerCount);
+        game.Add(stopMark);
+        game.Add(distanceToStop);
+        game.Add(stopTime);
+            
+        instance = this;
+    }
 
     public static UI GetInstance()
     {
@@ -85,5 +89,15 @@ public class UI
     public void HideStop()
     {
         stopMark.X = -500000;
+    }
+
+    public void UpdateCountdown(double countdown)
+    {
+        stopTime.Text = "Time on stop: " + countdown.ToString();
+    }
+
+    public void UpdatePassangerCount(int count)
+    {
+        passangerCount.Text = "Passangers: " + count.ToString();
     }
 }

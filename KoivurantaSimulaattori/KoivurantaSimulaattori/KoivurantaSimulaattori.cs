@@ -28,12 +28,25 @@ public class KoivurantaSimulaattori : PhysicsGame
         logger = new Logger("main");
         logger.Debug("AUTA MINUA");
         Image roadTexture = LoadImage("road");
+        logger.Debug("Loading road");
         Image leftSign = LoadImage("left");
+        logger.Debug("Loading left sign");
+        
         Image rightSign = LoadImage("right");
+        logger.Debug("Loading right");
+        
         Image busSign = LoadImage("stopsign");
+        logger.Debug("Loading stopsign");
+        
         Image busZone = LoadImage("busstop");
+        logger.Debug("Loading busstop");
+        
         Image busStop = LoadImage("stop");
+        logger.Debug("Loading stop");
+        
         Image person = LoadImage("person");
+        logger.Debug("Loading person");
+        
         
         UI gameUi = new UI(this, busStop);
         

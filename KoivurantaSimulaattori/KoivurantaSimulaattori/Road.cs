@@ -18,8 +18,9 @@ public class Road
     public readonly List<GameObject> stops = new List<GameObject>();
     public readonly List<GameObject> stopZones = new List<GameObject>();
     public readonly List<GameObject> stopZoneZones = new List<GameObject>();
-    public readonly List<GameObject> persons = new List<GameObject>();
-    
+    public readonly Dictionary<int, List<GameObject>> people = new Dictionary<int, List<GameObject>>();
+    public readonly HashSet<int> visitedStops = new HashSet<int>();
+
     public Bus bus;
     public PhysicsObject busObject;
     private static readonly int TERRAIN_PIECES = 4000;
@@ -28,6 +29,9 @@ public class Road
     private static readonly int BUS_STOPS = 20;
     private static readonly Logger logger = new Logger("road.cs");
     private UI gameUi = UI.GetInstance();
+    private long stopEnterTime = 0;
+
+    private int UpdateTick = 0;
 
     public void GenerateAll(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn, Image stopArea, Image stopSign, Image person)
     {
@@ -190,11 +194,12 @@ public class Road
         loaded = true;
     }
 
-    public void GenerateStops(PhysicsGame instance, Image sign, Image zone, Image person)
+    public void GenerateStops(PhysicsGame instance, Image sign, Image zone, Image personImage)
     {
         logger.Debug("Generating bus stop");
 
         HashSet<int> usedRoads = new HashSet<int>();
+
         for (int i = 0; i < BUS_STOPS; i++)
         {
             (int w, int h) = (256, 256);
@@ -239,21 +244,26 @@ public class Road
             
             stopZone.Position = stop.Position;
             stopZone.Angle = road.Angle + Angle.FromDegrees(offsetAngle);
+            stopZone.Tag = i;
             
             stopZones.Add(stopZone);
             stops.Add(stop);
             instance.Add(stopZone, -1);
             instance.Add(stop, 1);
+
+            List<GameObject> peopleList = new List<GameObject>();
             
             for (int j = 0; j < RandomGen.NextInt(8) + 1; j++)
             {
-                GameObject parsa = new GameObject(256, 256);
-                parsa.Image = person;
-                parsa.Position = new Vector(stop.X - RandomGen.NextInt(100), stop.Y - RandomGen.NextInt(100));
-                
-                persons.Add(parsa);
-                instance.Add(parsa);
+                GameObject person = new GameObject(256, 256);
+                person.Image = personImage;
+                person.Position = new Vector(stop.X - RandomGen.NextInt(100), stop.Y - RandomGen.NextInt(100));
+                peopleList.Add(person);
+
+                instance.Add(person);
             }
+
+            people.Add(i, peopleList);
         }
         
     }
@@ -263,12 +273,14 @@ public class Road
         return right > comparison.Left && left < comparison.Right && top > comparison.Bottom && down < comparison.Top;
     }
 
-    public (GameObject, double) GetNearestStop()
+    public (GameObject, double) GetNextStopDistance()
     {
         GameObject nearest = stopZones[0];
         double distToNearest = busObject.Position.Distance(nearest.Position);
         foreach (GameObject stopZone in stopZones)
         {
+            if (visitedStops.Contains((int)stopZone.Tag)) continue;
+
             double busDist = busObject.Position.Distance(stopZone.Position);
             if (busDist < distToNearest)
             {
@@ -304,22 +316,27 @@ public class Road
             }
         }
 
+        GameObject overlappingStop = null;
+
         foreach (GameObject stopZone in stopZones)
         {
             if (Overlapping(busRight, busLeft, busTop, busDown, stopZone))
             {
                 onStop = true;
-                busObject.Color = Color.Green;
-                Console.WriteLine("STOPP!");
+                overlappingStop = stopZone;
+
                 break;
             }
         }
         
-        
-        (GameObject nearestStop, double distance) = GetNearestStop();
-        gameUi.UpdateDistance(distance);
+        if(UpdateTick%10==0)
+        {
+            (GameObject nearestStop, double distance) = GetNextStopDistance();
+            gameUi.UpdateDistance(distance);
+        }
 
-        if (isOnRoad)
+
+        if (isOnRoad || onStop)
         {
             bus.SlowdownMultiplier = 1;
             busObject.Color = Color.Yellow;
@@ -327,10 +344,45 @@ public class Road
             bus.SlowdownMultiplier = 3;
             busObject.Color = Color.Red;
         }
+
+        int stopNumber = overlappingStop != null ? (int)overlappingStop.Tag : 0;
+        if (onStop && !visitedStops.Contains(stopNumber))
+        {
+            if(stopEnterTime == 0)
+            {
+                stopEnterTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+            else
+            {
+                long timeOnStop = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - stopEnterTime;
+                gameUi.UpdateCountdown((double)timeOnStop);
+                if(timeOnStop >= 3)
+                {
+                    foreach(GameObject person in people[stopNumber])
+                    {
+                        person.Destroy();
+                    }
+                    visitedStops.Add(stopNumber);
+                    bus.passangerCount += 3;
+                    gameUi.UpdatePassangerCount(bus.passangerCount);
+                }
+            }
+        }
+        else if(stopEnterTime != 0)
+        {
+            stopEnterTime = 0;
+        }
         
         sw.Stop();
         
         Console.WriteLine("ELAPSED ROAD " + sw.ElapsedMilliseconds + "ms");
+        UpdateTick++;
+
+        if(UpdateTick > 300)
+        {
+            UpdateTick = 0;
+        }
+
     }
 
     public void LoadBus(Bus bus)

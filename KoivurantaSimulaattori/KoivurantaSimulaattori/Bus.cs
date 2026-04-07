@@ -10,7 +10,7 @@ public class Bus
 {
     private PhysicsObject bus;
     private static Bus instance;
-    private static readonly int SPEED = 50;
+    private static readonly int SPEED = 100;
     private static readonly int TURNING_SPEED = 5;
     private static readonly double SLOWDOWN_SPEED = 0.02;
     private static readonly double TURN_SLOWDOWN_SPEED = 0.2;
@@ -26,7 +26,7 @@ public class Bus
     public double SlowdownMultiplier = 1;
     private bool handbrakePressed = false;
 
-    private int passangerAmount = 0;
+    public int passangerCount = 0;
     
     public Bus(ScreenView screen)
     {

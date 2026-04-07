@@ -23,7 +23,7 @@ public class Logger
     {
         string text = String.Format("[{0}:{1}]: {2}\n", level.ToUpper(), name, message);
         lines.Add(text);
-        
+        Console.WriteLine(text);
     }
 
     public void Debug(string message)
