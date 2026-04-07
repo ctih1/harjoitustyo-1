@@ -33,8 +33,9 @@ public class KoivurantaSimulaattori : PhysicsGame
         Image busSign = LoadImage("stopsign");
         Image busZone = LoadImage("busstop");
         Image busStop = LoadImage("stop");
+        Image person = LoadImage("person");
         
-        UI gameUi = new UI(this, Screen, busStop);
+        UI gameUi = new UI(this, busStop);
         
         busSign.Scaling = ImageScaling.Nearest;
         busZone.Scaling = ImageScaling.Nearest;
@@ -58,6 +59,8 @@ public class KoivurantaSimulaattori : PhysicsGame
         Keyboard.Listen(Key.A, ButtonState.Released, bus.SteeringRelease, "Steer right");
         Keyboard.Listen(Key.Space, ButtonState.Down, bus.Handbrake, "Hand brake");
         Keyboard.Listen(Key.Space, ButtonState.Released, bus.HandbrakeRelease, "Hand brake");
+        Keyboard.Listen(Key.J, ButtonState.Pressed, gameUi.ShowStop, "ÄH");
+        Keyboard.Listen(Key.K, ButtonState.Pressed, gameUi.HideStop, "ÄH");
         Keyboard.Listen(Key.Enter, ButtonState.Pressed,
             () => { bus.GetObject().Position = road.stops[stopIndex].Position;
                 stopIndex++;    
@@ -68,7 +71,7 @@ public class KoivurantaSimulaattori : PhysicsGame
         ControllerOne.Listen(Button.RightShoulder, ButtonState.Up, bus.HandbrakeRelease, "Release");
         Camera.ZoomFactor = 0.3;
         Camera.FollowedObject = busObject;
-        road.GenerateAll(this, roadTexture, leftSign, rightSign, busZone, busSign);
+        road.GenerateAll(this, roadTexture, leftSign, rightSign, busZone, busSign, person);
     }
 
     protected override void Update(Time time)

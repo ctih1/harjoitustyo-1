@@ -1,3 +1,5 @@
+using System;
+using System.Text.Encodings.Web;
 using Jypeli;
 
 namespace KoivurantaSimulaattori;
@@ -8,45 +10,52 @@ public class UI
     public Label passangerCount;
     public Label debugLabel;
     private Label stopMark;
+    private Label distanceToStop;
+    
     private static UI instance;
 
-    public UI(PhysicsGame game, ScreenView screen, Image busStop)
+    private Label CreateLabel(double x, double y)
     {
-        speedometer = new Label();
-        speedometer.Font = Font.DefaultBold;
-        speedometer.TextColor = Color.White;
-        speedometer.Y = screen.BottomSafe;
-        speedometer.X = screen.LeftSafe + 50;
-        speedometer.Layer = Layer.CreateStaticLayer();
+        Label baseLabel = new Label();
         
-        passangerCount = new Label();
-        passangerCount.Font = Font.DefaultBold;
-        passangerCount.TextColor = Color.White;
-        passangerCount.Y = screen.BottomSafe;
-        passangerCount.X = screen.LeftSafe + 50;
-        passangerCount.Layer = Layer.CreateStaticLayer();
+        baseLabel.Font = Font.DefaultBold;
+        baseLabel.TextColor = Color.White;
+        baseLabel.Layer = Layer.CreateStaticLayer();
 
-        debugLabel = new Label();
-        debugLabel.Color = Color.White;
-        debugLabel.TextColor = Color.Black;
-        debugLabel.X = screen.LeftSafe+50;
-        debugLabel.Y = screen.TopSafe-50;
-        debugLabel.Width = 400;
+        baseLabel.X = x;
+        baseLabel.Y = y;
 
-        stopMark = new Label();
-        stopMark.Image = busStop;
-        stopMark.Image.Scaling = ImageScaling.Nearest;
-        stopMark.Size = new Vector(200, 62);
-        stopMark.X = 0;
-        stopMark.Y = screen.TopSafe-62;
-        
-        game.Add(speedometer);
-        game.Add(debugLabel);
-        game.Add(passangerCount);
-        game.Add(stopMark);
-
-        instance = this;
+        return baseLabel;
     }
+
+    public UI(PhysicsGame game, Image busStop)
+        {
+            ScreenView screen = Game.Screen;
+            
+            speedometer = CreateLabel(screen.LeftSafe + 50, screen.BottomSafe);
+            passangerCount = CreateLabel(screen.LeftSafe + 50, screen.BottomSafe);
+            debugLabel = CreateLabel(screen.LeftSafe + 50, screen.TopSafe + 50);
+            debugLabel.Width = 500;
+            
+            stopMark = new Label();
+            stopMark.Image = busStop;
+            stopMark.Image.Scaling = ImageScaling.Nearest;
+            stopMark.Size = new Vector(200, 62);
+            stopMark.X = 0;
+            stopMark.Y = screen.TopSafe-62;
+
+            distanceToStop = CreateLabel(screen.RightSafe - 100, screen.TopSafe - 20);
+            
+            HideStop();
+            
+            game.Add(speedometer);
+            game.Add(debugLabel);
+            game.Add(passangerCount);
+            game.Add(stopMark);
+            game.Add(distanceToStop);
+            
+            instance = this;
+        }
 
     public static UI GetInstance()
     {
@@ -63,13 +72,18 @@ public class UI
         debugLabel.Text = info;
     }
 
+    public void UpdateDistance(double distance)
+    {
+        distanceToStop.Text = Math.Round(distance) / 100 + " meters";
+    }
+
     public void ShowStop()
     {
-        
+        stopMark.X = 0;
     }
 
     public void HideStop()
     {
-        
+        stopMark.X = -500000;
     }
 }

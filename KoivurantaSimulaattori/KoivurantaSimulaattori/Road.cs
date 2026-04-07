@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
+using System.Text.Json;
 using Jypeli;
+using Silk.NET.OpenGL;
 
 namespace KoivurantaSimulaattori;
 
@@ -15,6 +17,9 @@ public class Road
     public readonly List<GameObject> segments = new List<GameObject>();
     public readonly List<GameObject> stops = new List<GameObject>();
     public readonly List<GameObject> stopZones = new List<GameObject>();
+    public readonly List<GameObject> stopZoneZones = new List<GameObject>();
+    public readonly List<GameObject> persons = new List<GameObject>();
+    
     public Bus bus;
     public PhysicsObject busObject;
     private static readonly int TERRAIN_PIECES = 4000;
@@ -22,12 +27,13 @@ public class Road
     private static readonly int TURN_PIECES = 15;
     private static readonly int BUS_STOPS = 20;
     private static readonly Logger logger = new Logger("road.cs");
+    private UI gameUi = UI.GetInstance();
 
-    public void GenerateAll(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn, Image stopArea, Image stopSign)
+    public void GenerateAll(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn, Image stopArea, Image stopSign, Image person)
     {
         logger.Info("Creating everything");
         GenerateRoad(gameInstance, roadSegmentTexture, leftTurn, rightTurn);
-        GenerateStops(gameInstance, stopSign, stopArea);
+        GenerateStops(gameInstance, stopSign, stopArea, person);
     }
     public void GenerateRoad(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn)
     {
@@ -184,7 +190,7 @@ public class Road
         loaded = true;
     }
 
-    public void GenerateStops(PhysicsGame instance, Image sign, Image zone)
+    public void GenerateStops(PhysicsGame instance, Image sign, Image zone, Image person)
     {
         logger.Debug("Generating bus stop");
 
@@ -238,12 +244,40 @@ public class Road
             stops.Add(stop);
             instance.Add(stopZone, -1);
             instance.Add(stop, 1);
+            
+            for (int j = 0; j < RandomGen.NextInt(8) + 1; j++)
+            {
+                GameObject parsa = new GameObject(256, 256);
+                parsa.Image = person;
+                parsa.Position = new Vector(stop.X - RandomGen.NextInt(100), stop.Y - RandomGen.NextInt(100));
+                
+                persons.Add(parsa);
+                instance.Add(parsa);
+            }
         }
+        
     }
 
     public bool Overlapping(double right, double left, double top, double down, GameObject comparison)
     {
         return right > comparison.Left && left < comparison.Right && top > comparison.Bottom && down < comparison.Top;
+    }
+
+    public (GameObject, double) GetNearestStop()
+    {
+        GameObject nearest = stopZones[0];
+        double distToNearest = busObject.Position.Distance(nearest.Position);
+        foreach (GameObject stopZone in stopZones)
+        {
+            double busDist = busObject.Position.Distance(stopZone.Position);
+            if (busDist < distToNearest)
+            {
+                distToNearest = busDist;
+                nearest = stopZone;
+            }
+        }
+
+        return (nearest, distToNearest);
     }
 
     public void PhysicsUpdate(Camera Camera, ScreenView Screen)
@@ -277,8 +311,13 @@ public class Road
                 onStop = true;
                 busObject.Color = Color.Green;
                 Console.WriteLine("STOPP!");
+                break;
             }
         }
+        
+        
+        (GameObject nearestStop, double distance) = GetNearestStop();
+        gameUi.UpdateDistance(distance);
 
         if (isOnRoad)
         {
