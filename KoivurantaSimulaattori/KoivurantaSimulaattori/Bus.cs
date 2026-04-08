@@ -27,6 +27,8 @@ public class Bus
     private bool handbrakePressed = false;
 
     public int passangerCount = 0;
+    public bool stopping = false;
+    public bool backdoorOpen = false;
     
     public Bus(ScreenView screen)
     {
@@ -150,5 +152,11 @@ public class Bus
     public void TriggerAccel(AnalogState state)
     {
         ControllerTriggerGas = (state.State + 1) / 2.0;
+    }
+
+    public void ToggleBackdoor()
+    {
+        backdoorOpen = !backdoorOpen;
+        gameUi.UpdateBackdoorStatus(backdoorOpen);
     }
 }

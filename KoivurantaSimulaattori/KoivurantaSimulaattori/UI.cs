@@ -11,6 +11,7 @@ public class UI
     public Label debugLabel;
     private Label stopMark;
     private Label distanceToStop;
+    private Label backdoorStatus;
     private Label stopTime;
 
     private static UI instance;
@@ -37,6 +38,7 @@ public class UI
         passangerCount = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 300);
         debugLabel = CreateLabel(screen.LeftSafe + 50, screen.TopSafe -  100);
         stopTime = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 200);
+        backdoorStatus = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 500);
 
         debugLabel.Width = 500;
             
@@ -57,6 +59,7 @@ public class UI
         game.Add(stopMark);
         game.Add(distanceToStop);
         game.Add(stopTime);
+        game.Add(backdoorStatus);
             
         instance = this;
     }
@@ -99,5 +102,10 @@ public class UI
     public void UpdatePassangerCount(int count)
     {
         passangerCount.Text = "Passangers: " + count.ToString();
+    }
+
+    public void UpdateBackdoorStatus(bool status)
+    {
+        backdoorStatus.Text = status ? "Backdoor open" : "Backdoor closed";
     }
 }

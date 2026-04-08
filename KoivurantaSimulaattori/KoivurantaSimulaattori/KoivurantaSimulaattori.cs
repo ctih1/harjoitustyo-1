@@ -70,10 +70,9 @@ public class KoivurantaSimulaattori : PhysicsGame
         Keyboard.Listen(Key.D, ButtonState.Down, bus.Right, "Steer right");
         Keyboard.Listen(Key.D, ButtonState.Released, bus.SteeringRelease, "Steer right");
         Keyboard.Listen(Key.A, ButtonState.Released, bus.SteeringRelease, "Steer right");
+        Keyboard.Listen(Key.F, ButtonState.Released, bus.ToggleBackdoor, "Lets people leave the bus");
         Keyboard.Listen(Key.Space, ButtonState.Down, bus.Handbrake, "Hand brake");
         Keyboard.Listen(Key.Space, ButtonState.Released, bus.HandbrakeRelease, "Hand brake");
-        Keyboard.Listen(Key.J, ButtonState.Pressed, gameUi.ShowStop, "ÄH");
-        Keyboard.Listen(Key.K, ButtonState.Pressed, gameUi.HideStop, "ÄH");
         Keyboard.Listen(Key.Enter, ButtonState.Pressed,
             () => { bus.GetObject().Position = road.stops[stopIndex].Position;
                 stopIndex++;    
@@ -94,7 +93,6 @@ public class KoivurantaSimulaattori : PhysicsGame
         base.Update(Time);
         bus.GameLoop();
         sw.Stop();
-        Console.WriteLine(("frametime " + sw.ElapsedMilliseconds));
         double fps = Math.Round(1 / (sw.Elapsed.TotalMilliseconds / 1000));
         label.Text = fps + "fps";
     }

@@ -23,11 +23,11 @@ public class Road
 
     public Bus bus;
     public PhysicsObject busObject;
-    private static readonly int TERRAIN_PIECES = 4000;
+    private static readonly int TERRAIN_PIECES = 1000;
     private bool loaded;
     private static readonly int TURN_PIECES = 15;
-    private static readonly int BUS_STOPS = 20;
-    private static readonly Logger logger = new Logger("road.cs");
+    private static readonly int BUS_STOPS = 5;
+    private static readonly Logger logger = new Logger("Road.cs");
     private UI gameUi = UI.GetInstance();
     private long stopEnterTime = 0;
 
@@ -328,11 +328,17 @@ public class Road
                 break;
             }
         }
-        
-        if(UpdateTick%10==0)
+
+        if (UpdateTick % 10 == 0)
         {
             (GameObject nearestStop, double distance) = GetNextStopDistance();
             gameUi.UpdateDistance(distance);
+
+            if ((int)UpdateTick/10 == RandomGen.NextInt(30) && distance > 50 && bus.passangerCount >= 1)
+            {
+                bus.stopping = true;
+                gameUi.ShowStop();
+            }
         }
 
 
@@ -356,6 +362,15 @@ public class Road
             {
                 long timeOnStop = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - stopEnterTime;
                 gameUi.UpdateCountdown((double)timeOnStop);
+
+                if(timeOnStop >= 1 && bus.stopping && bus.backdoorOpen)
+                {
+                    gameUi.HideStop();
+                    bus.stopping = false;
+                    bus.passangerCount = Math.Max(1, bus.passangerCount-RandomGen.NextInt(3));
+                    gameUi.UpdatePassangerCount(bus.passangerCount);
+                }
+
                 if(timeOnStop >= 3)
                 {
                     foreach(GameObject person in people[stopNumber])
@@ -366,13 +381,14 @@ public class Road
                     bus.passangerCount += 3;
                     gameUi.UpdatePassangerCount(bus.passangerCount);
                 }
+
             }
         }
         else if(stopEnterTime != 0)
         {
             stopEnterTime = 0;
         }
-        
+
         sw.Stop();
         
         Console.WriteLine("ELAPSED ROAD " + sw.ElapsedMilliseconds + "ms");
@@ -382,7 +398,6 @@ public class Road
         {
             UpdateTick = 0;
         }
-
     }
 
     public void LoadBus(Bus bus)
