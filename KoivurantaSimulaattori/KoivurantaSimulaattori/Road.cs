@@ -352,7 +352,7 @@ public class Road
         }
 
         int stopNumber = overlappingStop != null ? (int)overlappingStop.Tag : 0;
-        if (onStop && !visitedStops.Contains(stopNumber))
+        if (onStop)
         {
             if(stopEnterTime == 0)
             {
@@ -371,7 +371,7 @@ public class Road
                     gameUi.UpdatePassangerCount(bus.passangerCount);
                 }
 
-                if(timeOnStop >= 3)
+                if(timeOnStop >= 3 && !visitedStops.Contains(stopNumber))
                 {
                     foreach(GameObject person in people[stopNumber])
                     {
