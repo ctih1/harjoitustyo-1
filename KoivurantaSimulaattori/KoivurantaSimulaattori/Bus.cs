@@ -29,6 +29,7 @@ public class Bus
     public int passangerCount = 0;
     public bool stopping = false;
     public bool backdoorOpen = false;
+    public double anger = 0.0;
     
     public Bus(ScreenView screen)
     {
