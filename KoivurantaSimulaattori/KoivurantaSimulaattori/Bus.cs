@@ -33,6 +33,8 @@ public class Bus
     double generalAnger = 0;
     public double waitingAnger = 0;
     public double speedAngerOffset = 0;
+    public double score = 0.0;
+    public double scoreMultiplier = 1.0;
     
     public Bus(ScreenView screen)
     {
@@ -156,10 +158,35 @@ public class Bus
 
         speedAngerOffset = Math.Min(0.3, Math.Max(speedAngerOffset, -0.3));
 
-        gameUi.UpdateDebugInfo(string.Format("x,y: {0},{1}", Math.Round(bus.Position.X), Math.Round(bus.Position.Y)));
-        gameUi.UpdateAnger(Math.Max(0, CalculateHeatAnger(temperature) + waitingAnger + generalAnger + speedAngerOffset));
         gameUi.UpdateHeatRequirement(temperature > 35);
         gameUi.UpdateSpeedRequirement(kmh < 40);
+
+        double heatHate = CalculateHeatAnger(temperature);
+        double totalAnger = Math.Max(0, heatHate + waitingAnger + generalAnger + speedAngerOffset);
+        gameUi.UpdateAnger(totalAnger);
+        gameUi.UpdateHates(heatHate, waitingAnger, generalAnger, speedAngerOffset);
+
+        if (totalAnger > 0.92)
+        {
+            scoreMultiplier = 0.4;
+            gameUi.UpdateScoreMultiplier(scoreMultiplier);
+        }
+        else if(totalAnger > 0.8 && totalAnger < 0.9)
+        {
+            scoreMultiplier = 1.4;
+            gameUi.UpdateScoreMultiplier(scoreMultiplier);
+        }
+        else if(totalAnger > 0.5)
+        {
+            scoreMultiplier = 1.2;
+        }
+        else
+        {
+            scoreMultiplier = 1.0;
+            gameUi.UpdateScoreMultiplier(scoreMultiplier);
+        }
+
+        ChangeScore(kmh/100);
 
         Angle angle = Angle.FromDegrees(bus.Angle.Degrees + TURNING_SPEED * TurningVelocity);
         bus.Angle = angle;
@@ -220,6 +247,12 @@ public class Bus
     public void DecreaseAnger(double amount)
     {
         SetAnger(this.generalAnger - amount);
+    }
+
+    public void ChangeScore(double amount)
+    {
+        score += amount * scoreMultiplier;
+        gameUi.UpdateScoreText(score);
     }
 
 }

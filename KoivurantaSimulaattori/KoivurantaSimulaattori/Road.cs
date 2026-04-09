@@ -13,7 +13,7 @@ namespace KoivurantaSimulaattori;
 
 public class Road
 {
-    private static bool debug = true;
+    private static bool debug = false;
     private static readonly int SIZE = 400;
     public readonly List<GameObject> segments = new List<GameObject>();
     public readonly List<GameObject> stops = new List<GameObject>();
@@ -410,7 +410,7 @@ public class Road
             else
             {
                 long timeOnStop = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - stopEnterTime;
-                gameUi.UpdateCountdown((double)timeOnStop);
+                gameUi.UpdateCountdown(timeOnStop);
                  
                 if(timeOnStop >= 2 && bus.stopping)
                 {
@@ -429,6 +429,7 @@ public class Road
                         gameUi.UpdatePassangerCount(bus.passangerCount);
                         bus.waitingAnger = 0;
                         gameUi.UpdateHoldingBackRequirement(false);
+                        bus.ChangeScore(1200);
 
                     }
                 }
@@ -443,6 +444,7 @@ public class Road
                     visitedStops.Add(stopNumber);
                     bus.passangerCount += 3;
                     gameUi.UpdatePassangerCount(bus.passangerCount);
+                    bus.ChangeScore(1200 * (2 + RandomGen.NextInt(3)));
                 }
 
             }
@@ -450,6 +452,7 @@ public class Road
         else if(stopEnterTime != 0)
         {
             stopEnterTime = 0;
+            gameUi.UpdateCountdown(0);
         }
 
         sw.Stop();

@@ -22,7 +22,7 @@ public class KoivurantaSimulaattori : PhysicsGame
     private Bus bus;
     private Logger logger;
     private Label label;
-    
+    private UI gameUi;
     public override void Begin()
     {
         logger = new Logger("main");
@@ -46,9 +46,11 @@ public class KoivurantaSimulaattori : PhysicsGame
         
         Image person = LoadImage("person");
         logger.Debug("Loading person");
+
+        Level.BackgroundColor = Color.Gray;
         
         
-        UI gameUi = new UI(this, busStop);
+        gameUi = new UI(this, busStop);
         
         busSign.Scaling = ImageScaling.Nearest;
         busZone.Scaling = ImageScaling.Nearest;
@@ -98,5 +100,6 @@ public class KoivurantaSimulaattori : PhysicsGame
         sw.Stop();
         double fps = Math.Round(1 / (sw.Elapsed.TotalMilliseconds / 1000));
         label.Text = fps + "fps";
+        gameUi.PositionLine(label, 4);
     }
 }
