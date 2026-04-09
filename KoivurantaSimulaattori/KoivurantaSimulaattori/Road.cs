@@ -13,7 +13,7 @@ namespace KoivurantaSimulaattori;
 
 public class Road
 {
-    private static bool debug = false;
+    private static bool debug = true;
     private static readonly int SIZE = 400;
     public readonly List<GameObject> segments = new List<GameObject>();
     public readonly List<GameObject> stops = new List<GameObject>();
@@ -26,7 +26,7 @@ public class Road
     public PhysicsObject busObject;
     private static readonly int TERRAIN_PIECES = 1000;
     private bool loaded;
-    private static readonly int TURN_PIECES = 15;
+    private static readonly int TURN_PIECES = 20;
     private static readonly int BUS_STOPS = 5;
     private static readonly Logger logger = new Logger("Road.cs");
     private UI gameUi = UI.GetInstance();
@@ -40,6 +40,30 @@ public class Road
         GenerateRoad(gameInstance, roadSegmentTexture, leftTurn, rightTurn, stopSign, stopArea);
         GenerateStops(gameInstance, stopSign, stopArea, person);
     }
+
+    private int CapAngle(int angle)
+    {
+        if (angle > 360)
+        {
+            angle = 360 - angle;
+        }
+        else if (angle < 0)
+        {
+            angle = 360 + angle;
+        }
+
+        if (angle == 180)
+        {
+            angle = 0;
+        }
+        if (angle == 270)
+        {
+            angle = 90;
+        }
+
+        return angle;
+    }
+
     public void GenerateRoad(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn, Image stopSign, Image stopZoneImage)
     {
         logger.Info("Creating " + TERRAIN_PIECES + " road pieces");
@@ -49,7 +73,7 @@ public class Road
         int stepsFromLastTurn = 0;
         int stepsUntilTurn = -1;
         int minSteps = -1;
-        string turningDirection = "";
+        int turnAngle = 0;
 
         for (int i=0; i<TERRAIN_PIECES; i++)
         {
@@ -63,15 +87,21 @@ public class Road
 
                 if (i % 2 == 0)
                 {
-                    turningDirection = "left";
-                    sign.Image = leftTurn;
+                    turnAngle = CapAngle(turnAngle - 90);
                 }
                 else
                 {
-                    turningDirection = "right";
-                    sign.Image = rightTurn;
+                    turnAngle = CapAngle(turnAngle + 90);
                 }
-                
+
+                if(turnAngle == 90)
+                {
+                    sign.Image = rightTurn;
+                } else
+                {
+                    sign.Image = leftTurn; 
+                }
+
                 stepsFromLastTurn = 0;
                 stepsUntilTurn = 8;
 
@@ -115,7 +145,7 @@ public class Road
 
                     if (debug)
                     {
-                        Label dbgLabel = new Label(angle + " #" + j + " / "  + 90 + turningDirection);
+                        Label dbgLabel = new Label(angle + " #" + j + " / "  + 90);
                         dbgLabel.X = rotationPiece.X;
                         dbgLabel.Y = rotationPiece.Y;
                         dbgLabel.TextColor = Color.Red;
@@ -131,29 +161,8 @@ public class Road
                     currentX += (int)a;
                 }
 
-                if (turningDirection == "left") {
-                    currentRotation -= 90;
-                } else {
-                    currentRotation += 90;
-                }
 
-                if (currentRotation > 360)
-                {
-                    currentRotation = 360 - currentRotation;
-                } else if (currentRotation < 0)
-                {
-                    currentRotation = 360 + currentRotation;
-                }
-
-                if (currentRotation == 180)
-                {
-                    currentRotation = 0;
-                }
-                if (currentRotation == 270)
-                {
-                    currentRotation = 90;
-                }
-
+                currentRotation = turnAngle;
             }
 
             GameObject roadSegment = new GameObject(SIZE, SIZE);
@@ -192,7 +201,15 @@ public class Road
             gameInstance.Add(roadSegment, -3);
         }
 
-        (GameObject stop, GameObject stopZone) = GenerateStop(gameInstance, new HashSet<int>(), -1, stopSign, stopZoneImage);
+        Angle finalStopAngle = Angle.FromDegrees(currentRotation+270);
+        (GameObject stop, GameObject stopZone) = GenerateStop(gameInstance,
+            new HashSet<int>(),
+            new Vector(currentX + finalStopAngle.Cos * 256, currentY - finalStopAngle.Sin * 256),
+            Angle.FromDegrees(currentRotation == 90 ? finalStopAngle.Degrees : finalStopAngle.Degrees - 180),
+            -1,
+            stopSign,
+            stopZoneImage
+        );
 
         loaded = true;
     }
@@ -219,7 +236,7 @@ public class Road
         stop.Position = position;
 
         stopZone.Position = stop.Position;
-        stopZone.Angle = ;
+        stopZone.Angle = angle;
         stopZone.Tag = tag;
 
         stopZones.Add(stopZone);
@@ -267,7 +284,7 @@ public class Road
                 offsetAngle = 180;
             }
             Angle angle = road.Angle + Angle.FromDegrees(offsetAngle);
-            (GameObject stop, GameObject stopZone) = GenerateStop(instance, position, angle usedRoads, i, sign, zone);
+            (GameObject stop, GameObject stopZone) = GenerateStop(instance, usedRoads, position, angle, i, sign, zone);
             for (int j = 0; j < RandomGen.NextInt(8) + 1; j++)
             {
                 GameObject person = new GameObject(256, 256);
@@ -385,7 +402,7 @@ public class Road
                     gameUi.UpdatePassangerCount(bus.passangerCount);
                 }
 
-                if(timeOnStop >= 3 && !visitedStops.Contains(stopNumber))
+                if(timeOnStop >= 3 && !visitedStops.Contains(stopNumber) && stopNumber != -1)
                 {
                     foreach(GameObject person in people[stopNumber])
                     {
