@@ -358,7 +358,6 @@ public class Road
         }
 
 
-
         if (UpdateTick % 10 == 0)
         {
             (GameObject nearestStop, double distance) = GetNextStopDistance();
@@ -381,9 +380,24 @@ public class Road
             busObject.Color = Color.Red;
         }
 
-        if(isOnRoad && !onStop)
+        if(!isOnRoad)
+        {
+            bus.IncreaseAnger(0.001);
+        } else
+        {
+            bus.DecreaseAnger(0.0001);
+        }
+        if (isOnRoad && !onStop)
         {
             gameUi.UpdateBackDoorRequirement(bus.backdoorOpen);
+            if (bus.backdoorOpen)
+            {
+                bus.IncreaseAnger(0.0007);
+            }
+            else
+            {
+                bus.DecreaseAnger(0.0014);
+            }
         }
 
         int stopNumber = overlappingStop != null ? (int)overlappingStop.Tag : 0;
@@ -398,7 +412,7 @@ public class Road
                 long timeOnStop = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - stopEnterTime;
                 gameUi.UpdateCountdown((double)timeOnStop);
                  
-                if(timeOnStop >= 1 && bus.stopping)
+                if(timeOnStop >= 2 && bus.stopping)
                 {
                     if(!bus.backdoorOpen) {
                         if (!visitedStops.Contains(stopNumber))
@@ -419,7 +433,7 @@ public class Road
                     }
                 }
 
-                if (timeOnStop >= 3 && !visitedStops.Contains(stopNumber) && stopNumber != -1)
+                if (timeOnStop >= 4 && !visitedStops.Contains(stopNumber) && stopNumber != -1)
                 {
                     foreach(GameObject person in people[stopNumber])
                     {

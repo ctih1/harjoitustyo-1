@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Encodings.Web;
 using Jypeli;
+using Jypeli.Widgets;
 
 namespace KoivurantaSimulaattori;
 
@@ -21,6 +22,7 @@ public class UI
     private Label guidelineTitle;
     private Label guidelineDescription;
     private List<Label> requirements = new List<Label>();
+    private ScreenView screen;
 
     private static UI instance;
 
@@ -40,7 +42,7 @@ public class UI
 
     public UI(PhysicsGame game, Image busStop)
     {
-        ScreenView screen = Game.Screen;
+        screen = Game.Screen;
 
             
         speedometer = CreateLabel(screen.LeftSafe + 50, screen.BottomSafe);
@@ -51,6 +53,8 @@ public class UI
         backdoorStatus = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 400);
         anger = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 450);
         temperature = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 500);
+        anger.SizeMode = TextSizeMode.None;
+        anger.Color = Color.Red;
 
 
         debugLabel.Width = 500;
@@ -156,6 +160,31 @@ public class UI
     public void UpdateAnger(double amount)
     {
         anger.Text = "Anger: " + Math.Round(amount*100).ToString() + "%";
+        anger.Width = screen.Width * amount;
+        anger.Position = new Vector(screen.Left + anger.Width/2.0, screen.Bottom + 60);
+
+
+        if(amount < 0.3)
+        {
+            anger.Color = Color.Green;
+        }
+        else if(amount < 0.5)
+        {
+            anger.Color = Color.Yellow;
+        } else if(amount < 0.7)
+        {
+            anger.Color = Color.Orange;
+        }
+        else if(amount < 0.9)
+        {
+            anger.Color = Color.Red;
+        } else
+        {
+            anger.Color = Color.Purple;
+        }
+
+        anger.TextColor = Color.White;
+
     }
 
     public void UpdateTemperature(int temperature)

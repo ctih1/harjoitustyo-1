@@ -30,7 +30,7 @@ public class Bus
     public bool stopping = false;
     public bool backdoorOpen = false;
     public int temperature = 20;
-    double anger = 0;
+    double generalAnger = 0;
     public double waitingAnger = 0;
     public double speedAngerOffset = 0;
     
@@ -82,6 +82,11 @@ public class Bus
         else
         {
             Velocity += 0.4;
+        }
+        if(Velocity > 3)
+        {
+            IncreaseAnger(Velocity / 10000);
+
         }
     }
        
@@ -152,7 +157,7 @@ public class Bus
         speedAngerOffset = Math.Min(0.3, Math.Max(speedAngerOffset, -0.3));
 
         gameUi.UpdateDebugInfo(string.Format("x,y: {0},{1}", Math.Round(bus.Position.X), Math.Round(bus.Position.Y)));
-        gameUi.UpdateAnger(CalculateHeatAnger(temperature) + waitingAnger + anger + speedAngerOffset);
+        gameUi.UpdateAnger(Math.Max(0, CalculateHeatAnger(temperature) + waitingAnger + generalAnger + speedAngerOffset));
         gameUi.UpdateHeatRequirement(temperature > 35);
         gameUi.UpdateSpeedRequirement(kmh < 40);
 
@@ -205,16 +210,16 @@ public class Bus
 
     public void SetAnger(double anger)
     {
-        this.anger = Math.Max(0, Math.Min(anger, 1.0));
+        this.generalAnger = Math.Max(0, Math.Min(anger, 0.7));
     }
 
     public void IncreaseAnger(double amount)
     {
-        SetAnger(this.anger + amount);
+        SetAnger(this.generalAnger + amount);
     }
     public void DecreaseAnger(double amount)
     {
-        SetAnger(this.anger - amount);
+        SetAnger(this.generalAnger - amount);
     }
 
 }
