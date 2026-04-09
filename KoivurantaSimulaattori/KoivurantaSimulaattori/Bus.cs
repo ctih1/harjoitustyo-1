@@ -29,7 +29,10 @@ public class Bus
     public int passangerCount = 0;
     public bool stopping = false;
     public bool backdoorOpen = false;
-    public double anger = 0.0;
+    public int temperature = 20;
+    double anger = 0;
+    public double waitingAnger = 0;
+    public double speedAngerOffset = 0;
     
     public Bus(ScreenView screen)
     {
@@ -88,6 +91,16 @@ public class Bus
         handbrakePressed = false;
     }
 
+    private double CalculateHeatAnger(double temp)
+    {
+        if(temp >= 20)
+        {
+            return Math.Pow(temperature - 20, 2) / 10.0 / 100;
+        } else
+        {
+            return -Math.Pow(temperature - 25, 3) / 100.0 / 100;
+        }
+    }
     public void GameLoop()
     {
         Velocity += (ControllerTriggerGas*0.07);
@@ -125,8 +138,24 @@ public class Bus
         bus.Velocity = new Vector(Math.Sin(bus.Angle.Radians), -Math.Cos(bus.Angle.Radians));
         bus.Velocity = bus.Velocity * SPEED * -Velocity;
 
-        gameUi.UpdateSpeedo(Math.Max(0, Math.Round(Velocity*1.4)));
+        double kmh = Math.Max(0, Math.Round(Velocity * 1.4));
+        gameUi.UpdateSpeedo(kmh);
+
+        if(kmh < 40)
+        {
+            speedAngerOffset += 0.0003;
+        } else
+        {
+            speedAngerOffset -= 0.0003;
+        }
+
+        speedAngerOffset = Math.Min(0.3, Math.Max(speedAngerOffset, -0.3));
+
         gameUi.UpdateDebugInfo(string.Format("x,y: {0},{1}", Math.Round(bus.Position.X), Math.Round(bus.Position.Y)));
+        gameUi.UpdateAnger(CalculateHeatAnger(temperature) + waitingAnger + anger + speedAngerOffset);
+        gameUi.UpdateHeatRequirement(temperature > 35);
+        gameUi.UpdateSpeedRequirement(kmh < 40);
+
         Angle angle = Angle.FromDegrees(bus.Angle.Degrees + TURNING_SPEED * TurningVelocity);
         bus.Angle = angle;
     }
@@ -160,4 +189,32 @@ public class Bus
         backdoorOpen = !backdoorOpen;
         gameUi.UpdateBackdoorStatus(backdoorOpen);
     }
+
+    public void IncreaseTemperature()
+    {
+        temperature = Math.Min(50, temperature + 1);
+        gameUi.UpdateTemperature(temperature);
+    }
+
+
+    public void DecreaseTemperature()
+    {
+        temperature = Math.Max(0, temperature -1);
+        gameUi.UpdateTemperature(temperature);
+    }
+
+    public void SetAnger(double anger)
+    {
+        this.anger = Math.Max(0, Math.Min(anger, 1.0));
+    }
+
+    public void IncreaseAnger(double amount)
+    {
+        SetAnger(this.anger + amount);
+    }
+    public void DecreaseAnger(double amount)
+    {
+        SetAnger(this.anger - amount);
+    }
+
 }

@@ -294,7 +294,6 @@ public class Road
 
                 instance.Add(person);
             }
-
             people.Add(i, peopleList);
         }
         
@@ -331,8 +330,6 @@ public class Road
         bool isOnRoad = false;
         bool onStop = false;
         
-        
-
         double busLeft = busObject.Left;
         double busRight = busObject.Right;
         double busTop = busObject.Top;
@@ -360,6 +357,8 @@ public class Road
             }
         }
 
+
+
         if (UpdateTick % 10 == 0)
         {
             (GameObject nearestStop, double distance) = GetNextStopDistance();
@@ -382,6 +381,11 @@ public class Road
             busObject.Color = Color.Red;
         }
 
+        if(isOnRoad && !onStop)
+        {
+            gameUi.UpdateBackDoorRequirement(bus.backdoorOpen);
+        }
+
         int stopNumber = overlappingStop != null ? (int)overlappingStop.Tag : 0;
         if (onStop)
         {
@@ -394,15 +398,28 @@ public class Road
                 long timeOnStop = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - stopEnterTime;
                 gameUi.UpdateCountdown((double)timeOnStop);
                  
-                if(timeOnStop >= 1 && bus.stopping && bus.backdoorOpen)
+                if(timeOnStop >= 1 && bus.stopping)
                 {
-                    gameUi.HideStop();
-                    bus.stopping = false;
-                    bus.passangerCount = Math.Max(1, bus.passangerCount-RandomGen.NextInt(3));
-                    gameUi.UpdatePassangerCount(bus.passangerCount);
+                    if(!bus.backdoorOpen) {
+                        if (!visitedStops.Contains(stopNumber))
+                        {
+                            bus.waitingAnger += 0.001 * (bus.passangerCount / 3.0);
+                            gameUi.UpdateHoldingBackRequirement(true);
+                        }
+                    }
+                    else
+                    {
+                        gameUi.HideStop();
+                        bus.stopping = false;
+                        bus.passangerCount = Math.Max(1, bus.passangerCount-RandomGen.NextInt(3));
+                        gameUi.UpdatePassangerCount(bus.passangerCount);
+                        bus.waitingAnger = 0;
+                        gameUi.UpdateHoldingBackRequirement(false);
+
+                    }
                 }
 
-                if(timeOnStop >= 3 && !visitedStops.Contains(stopNumber) && stopNumber != -1)
+                if (timeOnStop >= 3 && !visitedStops.Contains(stopNumber) && stopNumber != -1)
                 {
                     foreach(GameObject person in people[stopNumber])
                     {

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Encodings.Web;
 using Jypeli;
 
@@ -13,16 +15,22 @@ public class UI
     private Label distanceToStop;
     private Label backdoorStatus;
     private Label stopTime;
+    private Label anger;
+    private Label temperature;
+    private Label guidelineContainer;
+    private Label guidelineTitle;
+    private Label guidelineDescription;
+    private List<Label> requirements = new List<Label>();
 
     private static UI instance;
 
-    private Label CreateLabel(double x, double y)
+    private Label CreateLabel(double x, double y, string text = "Unset")
     {
         Label baseLabel = new Label();
         
         baseLabel.Font = Font.DefaultBold;
         baseLabel.TextColor = Color.White;
-        baseLabel.Layer = Layer.CreateStaticLayer();
+        baseLabel.Text = text;
 
         baseLabel.X = x;
         baseLabel.Y = y;
@@ -33,12 +41,17 @@ public class UI
     public UI(PhysicsGame game, Image busStop)
     {
         ScreenView screen = Game.Screen;
+
             
         speedometer = CreateLabel(screen.LeftSafe + 50, screen.BottomSafe);
-        passangerCount = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 300);
         debugLabel = CreateLabel(screen.LeftSafe + 50, screen.TopSafe -  100);
         stopTime = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 200);
-        backdoorStatus = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 500);
+        passangerCount = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 300);
+        distanceToStop = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 350);
+        backdoorStatus = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 400);
+        anger = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 450);
+        temperature = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 500);
+
 
         debugLabel.Width = 500;
             
@@ -49,10 +62,37 @@ public class UI
         stopMark.X = 0;
         stopMark.Y = screen.TopSafe-62;
 
-        distanceToStop = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 400);
-            
-        HideStop();
-            
+        guidelineContainer = new Label();
+        guidelineContainer.Width = 200;
+        guidelineContainer.Height = 200;
+        guidelineContainer.Color = Color.LightGray;
+        guidelineContainer.X = screen.Right - 100;
+        guidelineContainer.Y = screen.TopSafe - 100;
+
+        guidelineTitle = CreateLabel(screen.Right - 100, screen.TopSafe - 25, "Koivuranta Ohjeet");
+        guidelineTitle.TextColor = Color.Black;
+
+
+        guidelineDescription = CreateLabel(screen.Right - 100, screen.TopSafe - 60, "Yleisiä ohjeita liittyen\nasiakkaiden hyvinvointiin");
+        guidelineDescription.TextColor = Color.Black;
+        guidelineDescription.Font = new Font(16);
+
+        string[] reqs = ["Patteri on mahdollisimman kovalla", "Ajoneuvon nopeus on alle 30 kmh", "Takaovi pidetty kiinni pysäkillä", "Takaovi auki ajon aikana"];
+
+        for(int i=0; i<reqs.Length; i++)
+        {
+            string text = reqs[i];
+            Label reqLabel = CreateLabel(screen.Right - 200, screen.TopSafe - 80 - (25 * (i + 1)));
+            reqLabel.TextColor = Color.Black;
+            reqLabel.Text = text;
+            reqLabel.HorizontalAlignment = HorizontalAlignment.Right;
+            requirements.Add(reqLabel);
+            game.Add(reqLabel);
+        }
+
+
+        HideStop(); 
+
         game.Add(speedometer);
         game.Add(debugLabel);
         game.Add(passangerCount);
@@ -60,6 +100,10 @@ public class UI
         game.Add(distanceToStop);
         game.Add(stopTime);
         game.Add(backdoorStatus);
+        game.Add(anger);
+        game.Add(temperature);
+        game.Add(guidelineTitle);
+        game.Add(guidelineDescription);
             
         instance = this;
     }
@@ -108,4 +152,47 @@ public class UI
     {
         backdoorStatus.Text = status ? "Backdoor open" : "Backdoor closed";
     }
+
+    public void UpdateAnger(double amount)
+    {
+        anger.Text = "Anger: " + Math.Round(amount*100).ToString() + "%";
+    }
+
+    public void UpdateTemperature(int temperature)
+    {
+        if(temperature > 0)
+        {
+            this.temperature.Text = "Heater temp: " + temperature.ToString() + " *C";
+
+        } else
+        {
+            this.temperature.Text = "Heater disabled";
+        }
+    }
+
+    public void UpdateBoolColor(Label label, bool condition)
+    {
+        label.TextColor = condition ? Color.Green : Color.Red;
+    }
+
+    public void UpdateHoldingBackRequirement(bool status)
+    {
+        UpdateBoolColor(requirements[2], status);
+    }
+
+    public void UpdateSpeedRequirement(bool status)
+    {
+        UpdateBoolColor(requirements[1], status);
+    }
+
+    public void UpdateHeatRequirement(bool status)
+    {
+        UpdateBoolColor(requirements[0], status);
+    }
+
+    public void UpdateBackDoorRequirement(bool status)
+    {
+        UpdateBoolColor(requirements[3], status);
+    }
+
 }

@@ -77,6 +77,9 @@ public class KoivurantaSimulaattori : PhysicsGame
             () => { bus.GetObject().Position = road.stops[stopIndex].Position;
                 stopIndex++;    
             }, "");
+        Keyboard.Listen(Key.Down, ButtonState.Released, bus.DecreaseTemperature, "Decrease bus temp");
+        Keyboard.Listen(Key.Up, ButtonState.Released, bus.IncreaseTemperature, "Increase bus temp");
+
         ControllerOne.ListenAnalog(AnalogControl.LeftStick, 1.0/1000000000000000, bus.StickMove, "Steer");
         ControllerOne.ListenAnalog(AnalogControl.RightTrigger, 0.00001, bus.TriggerAccel, "Gas!");
         ControllerOne.Listen(Button.RightShoulder, ButtonState.Down, bus.Handbrake, "Hand brake");
