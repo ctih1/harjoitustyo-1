@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Security.AccessControl;
 using System.Security.Authentication.ExtendedProtection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,38 +25,32 @@ public class KoivurantaSimulaattori : PhysicsGame
     private Logger logger;
     private Label label;
     private UI gameUi;
+    private ScoreList scoreList;
+    private bool highScoreOpen = false;
+
+    private Image roadTexture;
+    private Image leftSign;
+    private Image rightSign;
+    private Image busSign;
+    private Image busZone;
+    private Image busStop;
+    private Image person;
+
     public override void Begin()
     {
         logger = new Logger("main");
         logger.Debug("AUTA MINUA");
-        Image roadTexture = LoadImage("road");
-        logger.Debug("Loading road");
-        Image leftSign = LoadImage("left");
-        logger.Debug("Loading left sign");
-        
-        Image rightSign = LoadImage("right");
-        logger.Debug("Loading right");
-        
-        Image busSign = LoadImage("stopsign");
-        logger.Debug("Loading stopsign");
-        
-        Image busZone = LoadImage("busstop");
-        logger.Debug("Loading busstop");
-        
-        Image busStop = LoadImage("stop");
-        logger.Debug("Loading stop");
-        
-        Image person = LoadImage("person");
-        logger.Debug("Loading person");
-
+        roadTexture = VerboseImageLoad("road");
+        leftSign = VerboseImageLoad("left");
+        rightSign = VerboseImageLoad("right");
+        busSign = VerboseImageLoad("stopsign");
+        busZone = VerboseImageLoad("busstop");
+        busStop = VerboseImageLoad("stop");
+        person = VerboseImageLoad("person");
         Level.BackgroundColor = Color.Gray;
-        
-        
+
         gameUi = new UI(this, busStop);
-        
-        busSign.Scaling = ImageScaling.Nearest;
-        busZone.Scaling = ImageScaling.Nearest;
-        
+  
         label = new Label("fps");
         label.Position = new Vector(Screen.LeftSafe + 20, Screen.TopSafe - 100);
         Add(label);
@@ -75,6 +71,7 @@ public class KoivurantaSimulaattori : PhysicsGame
         Keyboard.Listen(Key.F, ButtonState.Released, bus.ToggleBackdoor, "Lets people leave the bus");
         Keyboard.Listen(Key.Space, ButtonState.Down, bus.Handbrake, "Hand brake");
         Keyboard.Listen(Key.Space, ButtonState.Released, bus.HandbrakeRelease, "Hand brake");
+        Keyboard.Listen(Key.R, ButtonState.Released, ResetGame, "Resets Game's state");
         Keyboard.Listen(Key.Enter, ButtonState.Pressed,
             () => { bus.GetObject().Position = road.stops[stopIndex].Position;
                 stopIndex++;    
@@ -89,6 +86,69 @@ public class KoivurantaSimulaattori : PhysicsGame
         Camera.ZoomFactor = 0.3;
         Camera.FollowedObject = busObject;
         road.GenerateAll(this, roadTexture, leftSign, rightSign, busZone, busSign, person);
+
+        CreatehighscoreList();
+    }
+
+    private void DestroyList(List<GameObject> objs)
+    {
+        foreach (GameObject obj in objs) { 
+            if (!obj.IsDestroyed) obj.Destroy();
+        }
+
+        objs.Clear();
+    }
+        
+    private void ResetGame()
+    {
+        DestroyList(road.segments);
+        DestroyList(road.stops);
+        DestroyList(road.stopZones);
+        DestroyList(road.turnSigns);
+
+        road.finalStop.Destroy();
+        road.finalStopZone.Destroy();
+
+        bus.Reset();
+        road = new Road();
+        road.LoadBus(bus);
+        road.GenerateAll(this, roadTexture, leftSign, rightSign, busZone, busSign, person);
+    }
+        
+    private Image VerboseImageLoad(string name)
+    {
+        logger.Debug("Loading " + name + " image...");
+        Image image = LoadImage(name);
+        image.Scaling = ImageScaling.Nearest;
+        
+        return image;
+    }
+
+    private void CreatehighscoreList()
+    {
+        scoreList = DataStorage.TryLoad<ScoreList>(scoreList, "scoreList.xml");
+        if(scoreList == null)
+        {
+            scoreList = new ScoreList(10, true, 0);
+        }
+
+    }
+    public void ShowHighscoreList()
+    {
+        if (highScoreOpen) return;
+        int score = (int)bus.score;
+        HighScoreWindow window = new HighScoreWindow(
+            "High scores", $"You achieved a score of {score}",
+            scoreList, score
+        );
+;
+        window.Closed += (Window _) =>  { SaveScores(); };
+        Add(window);
+        highScoreOpen = true;
+    }
+    private void SaveScores()
+    {
+        DataStorage.Save<ScoreList>(scoreList, "scoreList.xml");
     }
 
     protected override void Update(Time time)

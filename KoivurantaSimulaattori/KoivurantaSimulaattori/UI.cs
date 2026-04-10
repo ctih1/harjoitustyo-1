@@ -220,7 +220,6 @@ public class UI
         stopMark.X = -500000;
     }
 
-
     public void UpdateCountdown(double countdown)
     {
         UpdateLine(stopTime, 300, Math.Min(3, countdown) / 3.0);
@@ -244,11 +243,11 @@ public class UI
         {
             return Color.Green;
         }
-        else if (amount < 0.5)
+        else if (amount < 0.7)
         {
             return Color.Yellow;
         }
-        else if (amount < 0.7)
+        else if (amount < 0.8)
         {
             return Color.Orange;
         }

@@ -19,8 +19,11 @@ public class Road
     public readonly List<GameObject> stops = new List<GameObject>();
     public readonly List<GameObject> stopZones = new List<GameObject>();
     public readonly List<GameObject> stopZoneZones = new List<GameObject>();
+    public readonly List<GameObject> turnSigns = new List<GameObject>();
     public readonly Dictionary<int, List<GameObject>> people = new Dictionary<int, List<GameObject>>();
     public readonly HashSet<int> visitedStops = new HashSet<int>();
+
+    private KoivurantaSimulaattori gameInstance;
 
     public Bus bus;
     public PhysicsObject busObject;
@@ -31,11 +34,14 @@ public class Road
     private static readonly Logger logger = new Logger("Road.cs");
     private UI gameUi = UI.GetInstance();
     private long stopEnterTime = 0;
+    public GameObject finalStop;
+    public GameObject finalStopZone;
 
     private int UpdateTick = 0;
 
-    public void GenerateAll(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn, Image stopArea, Image stopSign, Image person)
+    public void GenerateAll(KoivurantaSimulaattori game, Image roadSegmentTexture, Image leftTurn, Image rightTurn, Image stopArea, Image stopSign, Image person)
     {
+        this.gameInstance = game;
         logger.Info("Creating everything");
         GenerateRoad(gameInstance, roadSegmentTexture, leftTurn, rightTurn, stopSign, stopArea);
         GenerateStops(gameInstance, stopSign, stopArea, person);
@@ -105,6 +111,7 @@ public class Road
                 stepsFromLastTurn = 0;
                 stepsUntilTurn = 8;
 
+                turnSigns.Add(sign);
                 gameInstance.Add(sign);
             }
 
@@ -202,7 +209,7 @@ public class Road
         }
 
         Angle finalStopAngle = Angle.FromDegrees(currentRotation+270);
-        (GameObject stop, GameObject stopZone) = GenerateStop(gameInstance,
+        (finalStop, finalStopZone) = GenerateStop(gameInstance,
             new HashSet<int>(),
             new Vector(currentX + finalStopAngle.Cos * 256, currentY - finalStopAngle.Sin * 256),
             Angle.FromDegrees(currentRotation == 90 ? finalStopAngle.Degrees : finalStopAngle.Degrees - 180),
@@ -370,6 +377,11 @@ public class Road
             }
         }
 
+
+        if(onStop && (int)overlappingStop.Tag == -1)
+        {
+            gameInstance.ShowHighscoreList();
+        }
 
         if (isOnRoad || onStop)
         {

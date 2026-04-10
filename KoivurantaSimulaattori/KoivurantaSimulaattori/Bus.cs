@@ -166,17 +166,18 @@ public class Bus
         gameUi.UpdateAnger(totalAnger);
         gameUi.UpdateHates(heatHate, waitingAnger, generalAnger, speedAngerOffset);
 
-        if (totalAnger > 0.92)
+
+        if (totalAnger > 0.9)
         {
             scoreMultiplier = 0.4;
             gameUi.UpdateScoreMultiplier(scoreMultiplier);
         }
-        else if(totalAnger > 0.8 && totalAnger < 0.9)
+        else if(totalAnger > 0.7 && totalAnger < 0.9)
         {
             scoreMultiplier = 1.4;
             gameUi.UpdateScoreMultiplier(scoreMultiplier);
         }
-        else if(totalAnger > 0.5)
+        else if (totalAnger > 0.5 && totalAnger < 0.7)
         {
             scoreMultiplier = 1.2;
         }
@@ -190,6 +191,18 @@ public class Bus
 
         Angle angle = Angle.FromDegrees(bus.Angle.Degrees + TURNING_SPEED * TurningVelocity);
         bus.Angle = angle;
+    }
+
+    public void Reset()
+    {
+        bus.Position = new Vector(0, 0);
+        bus.Angle = Angle.Zero;
+        Velocity = 0;
+        TurningVelocity = 0;
+        score = 0;
+        scoreMultiplier = 1.0;
+        temperature = 20;
+        backdoorOpen = false;
     }
     public void Left()
     {
