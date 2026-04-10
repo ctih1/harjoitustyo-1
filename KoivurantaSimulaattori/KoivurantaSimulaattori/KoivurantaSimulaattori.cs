@@ -82,7 +82,7 @@ public class KoivurantaSimulaattori : PhysicsGame
         Camera.FollowedObject = busObject;
         road.GenerateAll(this, roadTexture, leftSign, rightSign, busZone, busSign, person);
 
-        CreatehighscoreList();
+        CreatehighsSoreList();
     }
 
     private void DestroyList(List<GameObject> objs)
@@ -119,7 +119,7 @@ public class KoivurantaSimulaattori : PhysicsGame
         return image;
     }
 
-    private void CreatehighscoreList()
+    private void CreatehighsSoreList()
     {
         scoreList = DataStorage.TryLoad(scoreList, "scoreList.xml");
         scoreList = scoreList ?? new ScoreList(10, true, 0);

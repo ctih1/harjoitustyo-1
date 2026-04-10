@@ -10,29 +10,25 @@ namespace KoivurantaSimulaattori;
 
 public class UI
 {
-    private PhysicsGame game;
-    private Label speedometer;
-    public Label passangerCount;
-    public Label debugLabel;
-    private Label stopMark;
-    private Label distanceToStop;
-    private Label backdoorStatus;
-    private Label stopTime;
-    private Label anger;
-    private Label temperature;
-    private Label guidelineContainer;
-    private Label guidelineTitle;
-    private Label guidelineDescription;
+    private readonly PhysicsGame game;
+    private readonly Label speedometer;
+    public readonly Label passengerCount;
+    private readonly Label stopMark;
+    private readonly Label distanceToStop;
+    private readonly Label backdoorStatus;
+    private readonly Label stopTime;
+    private readonly Label anger;
+    private readonly Label temperature;
 
-    private Label generalHateBar;
-    private Label heatHateBar;
-    private Label waitHateBar;
-    private Label speedHateBar;
-    private Label scoreText;
-    private Label scoreMultiplierText;
+    private readonly Label generalHateBar;
+    private readonly Label heatHateBar;
+    private readonly Label waitHateBar;
+    private readonly Label speedHateBar;
+    private readonly Label scoreText;
+    private readonly Label scoreMultiplierText;
 
-    private List<Label> requirements = new List<Label>();
-    private ScreenView screen;
+    private readonly List<Label> requirements = new ();
+    private readonly ScreenView screen;
 
     private static UI instance;
 
@@ -106,7 +102,7 @@ public class UI
 
         (stopTime, _) = CreateLine(screen.Top - 250, 300, Color.Blue, "Aikaa pys‰kill‰:");
 
-        passangerCount = CreateLabel(screen.LeftSafe + 50, screen.TopSafe-20);
+        passengerCount = CreateLabel(screen.LeftSafe + 50, screen.TopSafe-20);
         backdoorStatus = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 40);
         distanceToStop = CreateLabel(screen.LeftSafe + 50, screen.Top - 280);
         temperature = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 500);
@@ -139,11 +135,11 @@ public class UI
         stopMark.X = 0;
         stopMark.Y = screen.TopSafe-62;
 
-        guidelineTitle = CreateLabel(screen.Right - 200, screen.TopSafe - 120, "Koivuranta Ohjeet");
+        Label guidelineTitle = CreateLabel(screen.Right - 200, screen.TopSafe - 120, "Koivuranta Ohjeet");
         guidelineTitle.TextColor = Color.Black;
 
 
-        guidelineDescription = CreateLabel(screen.Right - 200, screen.TopSafe - 165, "Yleisi‰ ohjeita liittyen\nasiakkaiden hyvinvointiin");
+        Label guidelineDescription = CreateLabel(screen.Right - 200, screen.TopSafe - 165, "Yleisi‰ ohjeita liittyen\nasiakkaiden hyvinvointiin");
         guidelineDescription.TextColor = Color.Black;
         guidelineDescription.Font = new Font(20);
 
@@ -168,7 +164,7 @@ public class UI
         UpdateBackdoorStatus(false);
 
         game.Add(speedometer);
-        game.Add(passangerCount);
+        game.Add(passengerCount);
         game.Add(stopMark);
         game.Add(distanceToStop);
         game.Add(stopTime);
@@ -194,43 +190,74 @@ public class UI
     }
 
 
+    /// <summary>
+    /// P‰ivitt‰‰ et‰isyytt‰ seuraavalle pys‰kille
+    /// </summary>
+    /// <param name="distance">Matka l‰himm‰lle pys‰kille</param>
     public void UpdateDistance(double distance)
     {
         distanceToStop.Text = Math.Round(distance) / 100 + " metri‰ l‰himm‰lle pys‰kille";
         PositionLine(distanceToStop, 4);
     }
-
+    /// <summary>
+    /// N‰ytt‰‰ bussin STOP-merkin
+    /// </summary>
     public void ShowStop()
     {
         stopMark.X = 0;
     }
     
+    /// <summary>
+    /// Piilottaa bussin STOP-merkin
+    /// </summary>
+    public void HideStop()
+    {
+        stopMark.X = -500000;
+    }
+    
+    /// <summary>
+    /// P‰ivitt‰‰ piste-teksti‰
+    /// </summary>
+    /// <param name="score">Pisteet</param>
     public void UpdateScoreText(double score)
     {
         scoreText.Text = $"{score:000000}";
     }
 
+    /// <summary>
+    /// P‰ivitt‰‰ pisteen kerrointa
+    /// </summary>
+    /// <param name="multiplier">Pisteen kerroin</param>
     public void UpdateScoreMultiplier(double multiplier)
     {
         scoreMultiplierText.Text = (Math.Round(multiplier * 100) / 100).ToString() + "x";
     }
 
-    public void HideStop()
-    {
-        stopMark.X = -500000;
-    }
 
+
+    /// <summary>
+    /// P‰ivitt‰‰ pys‰kin aika-palkkia
+    /// </summary>
+    /// <param name="countdown">Aika pys‰kill‰</param>
     public void UpdateCountdown(double countdown)
     {
         UpdateLine(stopTime, 300, Math.Min(3, countdown) / 3.0);
     }
 
+    /// <summary>
+    /// P‰ivitt‰‰ matkustajien m‰‰r‰‰
+    /// </summary>
+    /// <param name="count">Matkustajien m‰‰r‰</param>
     public void UpdatePassangerCount(int count)
     {
-        passangerCount.Text = "Matkustajia: " + count.ToString();
-        PositionLine(passangerCount, 4);
+        passengerCount.Text = "Matkustajia: " + count.ToString();
+        PositionLine(passengerCount, 4);
     }
 
+    /// <summary>
+    /// P‰ivitt‰‰ taka-oven asentoa
+    /// </summary>
+    /// <param name="status">Onko taka-ovi auki</param>
     public void UpdateBackdoorStatus(bool status)
     {
         backdoorStatus.Text = "Takaovi: " + (status ? "auki" : "kiinni");
@@ -261,6 +288,10 @@ public class UI
         }
     } 
 
+    /// <summary>
+    /// P‰ivitt‰‰ yhteist‰ raivoa
+    /// </summary>
+    /// <param name="amount">Yhteisen vihan m‰‰r‰ (0-1)</param>
     public void UpdateAnger(double amount)
     {
         anger.Text = "Viha: " + Math.Round(amount*100).ToString() + "%";
@@ -272,6 +303,10 @@ public class UI
 
     }
 
+    /// <summary>
+    /// P‰ivitt‰‰ sis‰ist‰ l‰mpˆtilaa
+    /// </summary>
+    /// <param name="temperature">L‰mpˆ bussin sis‰ll‰</param>
     public void UpdateTemperature(int temperature)
     {
         if(temperature > 0)
@@ -285,31 +320,56 @@ public class UI
         PositionLine(this.temperature, 4);
     }
 
-    public void UpdateBoolColor(Label label, bool condition)
+    private void UpdateBoolColor(Label label, bool condition)
     {
         label.TextColor = condition ? Color.Green : Color.Red;
     }
 
+    
+    /// <summary>
+    /// P‰ivitt‰‰ takaoven ehtoa pys‰kill‰
+    /// </summary>
+    /// <param name="status">Toteutuuko ehto</param>
     public void UpdateHoldingBackRequirement(bool status)
     {
         UpdateBoolColor(requirements[2], status);
     }
 
+        
+    /// <summary>
+    /// P‰ivitt‰‰ nopeuden ehtoa
+    /// </summary>
+    /// <param name="status">Toteutuuko ehto</param>
     public void UpdateSpeedRequirement(bool status)
     {
         UpdateBoolColor(requirements[1], status);
     }
 
+    /// <summary>
+    /// P‰ivitt‰‰ l‰mpˆtilan ehtoa
+    /// </summary>
+    /// <param name="status">Toteutuuko ehto</param>
     public void UpdateHeatRequirement(bool status)
     {
         UpdateBoolColor(requirements[0], status);
     }
 
+    /// <summary>
+    /// P‰ivitt‰‰ taka-oven ehtoa matkalla
+    /// </summary>
+    /// <param name="status">Toteutuuko ehto</param>
     public void UpdateBackDoorRequirement(bool status)
     {
         UpdateBoolColor(requirements[3], status);
     }
 
+    /// <summary>
+    /// P‰ivitt‰‰ kaikkien vihojen omia mittareita
+    /// </summary>
+    /// <param name="heat">L‰mpˆtilasta tullut viha</param>
+    /// <param name="wait">Odotuksesta tullut viha</param>
+    /// <param name="normal">Yleinen viha</param>
+    /// <param name="speed">Nopeudesta tullut viha</param>
     public void UpdateHates(double heat, double wait, double normal, double speed)
     {
         heat /= 0.9;
@@ -327,7 +387,4 @@ public class UI
         UpdateLine(speedHateBar, 100, speed);
         speedHateBar.Color = GetRangeColor(speed);
     }
-
-    
-
 }
