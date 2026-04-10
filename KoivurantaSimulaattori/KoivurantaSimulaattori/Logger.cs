@@ -1,17 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Net;
 
 namespace KoivurantaSimulaattori;
 
 public class Logger
 {
-    private string name;
-    private List<string> lines = new List<string>();
-    private string logPath = Path.GetTempPath() + "jypeli.log";
+    private readonly string name;
+    private readonly string logPath = Path.GetTempPath() + "jypeli.log";
     
     public Logger(string name)
     {
@@ -21,8 +16,7 @@ public class Logger
 
     private void Output(string level, string message)
     {
-        string text = String.Format("[{0}:{1}]: {2}\n", level.ToUpper(), name, message);
-        lines.Add(text);
+        string text = "[" + level + ":" + name + "]: " + message + "\n";
         Console.WriteLine(text);
     }
 

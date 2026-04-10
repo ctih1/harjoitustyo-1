@@ -370,7 +370,7 @@ public class Road
             (GameObject nearestStop, double distance) = GetNextStopDistance();
             gameUi.UpdateDistance(distance);
 
-            if (UpdateTick/10 == RandomGen.NextInt(30) && distance > 50 && bus.passangerCount >= 1)
+            if (UpdateTick/10 == RandomGen.NextInt(30) && distance > 50 && bus.passengerCount >= 1)
             {
                 bus.stopping = true;
                 gameUi.ShowStop();
@@ -429,7 +429,7 @@ public class Road
                     if(!bus.backdoorOpen) {
                         if (!visitedStops.Contains(stopNumber))
                         {
-                            bus.waitingAnger += 0.001 * (bus.passangerCount / 3.0);
+                            bus.waitingAnger += 0.001 * (bus.passengerCount / 3.0);
                             gameUi.UpdateHoldingBackRequirement(true);
                         }
                     }
@@ -437,8 +437,8 @@ public class Road
                     {
                         gameUi.HideStop();
                         bus.stopping = false;
-                        bus.passangerCount = Math.Max(1, bus.passangerCount-RandomGen.NextInt(3));
-                        gameUi.UpdatePassangerCount(bus.passangerCount);
+                        bus.passengerCount = Math.Max(1, bus.passengerCount-RandomGen.NextInt(3));
+                        gameUi.UpdatePassangerCount(bus.passengerCount);
                         bus.waitingAnger = 0;
                         gameUi.UpdateHoldingBackRequirement(false);
                         bus.ChangeScore(1200);
@@ -454,8 +454,8 @@ public class Road
                     }
 
                     visitedStops.Add(stopNumber);
-                    bus.passangerCount += 3;
-                    gameUi.UpdatePassangerCount(bus.passangerCount);
+                    bus.passengerCount += 3;
+                    gameUi.UpdatePassangerCount(bus.passengerCount);
                     bus.ChangeScore(1200 * (2 + RandomGen.NextInt(3)));
                 }
 

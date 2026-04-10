@@ -1,14 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Security.Authentication.ExtendedProtection;
-using System.Threading;
-using System.Threading.Tasks;
 using Jypeli;
-using Jypeli.Assets;
-using Jypeli.Controls;
 using Jypeli.Widgets;
 
 namespace KoivurantaSimulaattori;
@@ -20,13 +13,12 @@ namespace KoivurantaSimulaattori;
 public class KoivurantaSimulaattori : PhysicsGame
 {
     private Road road;
-    private Thread roadThread;
     private Bus bus;
     private Logger logger;
     private Label label;
     private UI gameUi;
     private ScoreList scoreList;
-    private bool highScoreOpen = false;
+    private bool highScoreOpen;
 
     private Image roadTexture;
     private Image leftSign;
@@ -56,7 +48,7 @@ public class KoivurantaSimulaattori : PhysicsGame
         Add(label);
         
         road = new Road();
-        bus = new Bus(Screen);
+        bus = new Bus();
         PhysicsObject busObject = bus.GetObject();
         Add(busObject);
         int stopIndex = 0;
@@ -126,11 +118,8 @@ public class KoivurantaSimulaattori : PhysicsGame
 
     private void CreatehighscoreList()
     {
-        scoreList = DataStorage.TryLoad<ScoreList>(scoreList, "scoreList.xml");
-        if(scoreList == null)
-        {
-            scoreList = new ScoreList(10, true, 0);
-        }
+        scoreList = DataStorage.TryLoad(scoreList, "scoreList.xml");
+        scoreList = scoreList ?? new ScoreList(10, true, 0);
 
     }
     public void ShowHighscoreList()
@@ -141,14 +130,14 @@ public class KoivurantaSimulaattori : PhysicsGame
             "High scores", $"You achieved a score of {score}",
             scoreList, score
         );
-;
-        window.Closed += (Window _) =>  { SaveScores(); };
+        
+        window.Closed += (_) =>  { SaveScores(); };
         Add(window);
         highScoreOpen = true;
     }
     private void SaveScores()
     {
-        DataStorage.Save<ScoreList>(scoreList, "scoreList.xml");
+        DataStorage.Save(scoreList, "scoreList.xml");
     }
 
     protected override void Update(Time time)

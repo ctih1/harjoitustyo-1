@@ -1,48 +1,43 @@
 using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using FarseerPhysics.Dynamics.Contacts;
 using Jypeli;
 
 namespace KoivurantaSimulaattori;
 
 public class Bus
 {
-    private PhysicsObject bus;
-    private static Bus instance;
+    private readonly PhysicsObject bus;
     private static readonly int SPEED = 100;
     private static readonly int TURNING_SPEED = 5;
     private static readonly double SLOWDOWN_SPEED = 0.02;
     private static readonly double TURN_SLOWDOWN_SPEED = 0.2;
     private static readonly double MAX_TURN_VELOCITY = 2.5;
     private static readonly int MAX_VELOCITY = 800;
-    private static Logger logger = new Logger("bus.cs");
-    private UI gameUi;
+    private static readonly Logger logger = new Logger("bus.cs");
+    private readonly UI gameUi;
 
-    private double TurningVelocity = 0;
-    private double Velocity = 0;
-    private double ControllerTriggerGas = 0;
-    private Vector ControllerStickRight = new Vector();
+    private double TurningVelocity;
+    private double Velocity;
+    private double ControllerTriggerGas;
+    private Vector ControllerStickRight;
     public double SlowdownMultiplier = 1;
-    private bool handbrakePressed = false;
+    private bool handbrakePressed;
 
-    public int passangerCount = 0;
+    public int passengerCount = 0;
     public bool stopping = false;
-    public bool backdoorOpen = false;
+    public bool backdoorOpen;
     public int temperature = 20;
-    double generalAnger = 0;
+    private double generalAnger;
     public double waitingAnger = 0;
-    public double speedAngerOffset = 0;
-    public double score = 0.0;
+    public double speedAngerOffset;
+    public double score;
     public double scoreMultiplier = 1.0;
     
-    public Bus(ScreenView screen)
+    public Bus()
     {
         logger.Info("Creating bus");
         bus = new PhysicsObject(50, 175);
         bus.Shape = Shape.Rectangle;
         bus.Color = Color.Yellow;
-        instance = this;
         
         gameUi = UI.GetInstance();
     }
@@ -75,7 +70,7 @@ public class Bus
 
     public void Handbrake()
     {
-        logger.Debug("Handbrake actiavted");
+        logger.Debug("Handbrake activated");
         handbrakePressed = true;
         if (Velocity > 0)
         {
@@ -113,7 +108,7 @@ public class Bus
         Velocity += (ControllerTriggerGas*0.07);
         // y=(x-0.1)^(((1)/(3)))
         TurningVelocity += (-ControllerStickRight.X)*0.28;
-        if (TurningVelocity < 0.15 && TurningVelocity > -0.15) {
+        if (TurningVelocity is < 0.15 and > -0.15) {
             TurningVelocity = 0;
         } else if (TurningVelocity > 0) {
             TurningVelocity -= TURN_SLOWDOWN_SPEED;
@@ -131,7 +126,7 @@ public class Bus
             TurningVelocity = -MAX_TURN_VELOCITY;
         }
 
-        if (Velocity < 0.05 && Velocity > -0.05) {
+        if (Velocity is < 0.05 and > -0.05) {
             Velocity = 0;
         } else if (Velocity > 0) {
             Velocity -= SLOWDOWN_SPEED*SlowdownMultiplier;
@@ -172,12 +167,12 @@ public class Bus
             scoreMultiplier = 0.4;
             gameUi.UpdateScoreMultiplier(scoreMultiplier);
         }
-        else if(totalAnger > 0.7 && totalAnger < 0.9)
+        else if(totalAnger is > 0.7 and < 0.9)
         {
             scoreMultiplier = 1.4;
             gameUi.UpdateScoreMultiplier(scoreMultiplier);
         }
-        else if (totalAnger > 0.5 && totalAnger < 0.7)
+        else if (totalAnger is > 0.5 and < 0.7)
         {
             scoreMultiplier = 1.2;
         }
