@@ -87,6 +87,10 @@ public class KoivurantaSimulaattori : PhysicsGame
         CreatehighsSoreList();
     }
 
+    
+    /// <summary>
+    /// Poistaa kaikki objektit listassa
+    /// </summary>
     private void DestroyList(List<GameObject> objs)
     {
         foreach (GameObject obj in objs)
@@ -97,6 +101,9 @@ public class KoivurantaSimulaattori : PhysicsGame
         objs.Clear();
     }
 
+    /// <summary>
+    /// Resettaa pelin alkukohtaan
+    /// </summary>
     private void ResetGame()
     {
         DestroyList(road.segments);
@@ -114,6 +121,9 @@ public class KoivurantaSimulaattori : PhysicsGame
         road.GenerateAll(this, roadTexture, leftSign, rightSign, busZone, busSign, person);
     }
 
+    /// <summary>
+    /// Lataa kuvan ja tulostaa 
+    /// </summary>
     private Image VerboseImageLoad(string name)
     {
         logger.Debug("Loading " + name + " image...");
@@ -123,6 +133,10 @@ public class KoivurantaSimulaattori : PhysicsGame
         return image;
     }
 
+    
+    /// <summary>
+    /// Luo uuden highscore listan
+    /// </summary>
     private void CreatehighsSoreList()
     {
         scoreList = DataStorage.TryLoad(scoreList, "scoreList.xml");
@@ -147,6 +161,9 @@ public class KoivurantaSimulaattori : PhysicsGame
     }
 
     
+    /// <summary>
+    /// Tallenta pisteet
+    /// </summary>
     private void SaveScores()
     {
         DataStorage.Save(scoreList, "scoreList.xml");
