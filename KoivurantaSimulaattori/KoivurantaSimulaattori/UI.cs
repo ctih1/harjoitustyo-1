@@ -257,7 +257,7 @@ public class UI
     /// <param name="count">Matkustajien m‰‰r‰</param>
     public void UpdatePassangerCount(int count)
     {
-        passengerCount.Text = "Matkustajia: " + count.ToString();
+        passengerCount.Text = "Matkustajia: " + count;
         PositionLine(passengerCount, 4);
     }
 
@@ -277,22 +277,20 @@ public class UI
         {
             return Color.Green;
         }
-        else if (amount < 0.7)
+        if (amount < 0.7)
         {
             return Color.Yellow;
         }
-        else if (amount < 0.8)
+        if (amount < 0.8)
         {
             return Color.Orange;
         }
-        else if (amount < 0.9)
+        if (amount < 0.9)
         {
             return Color.Red;
         }
-        else
-        {
-            return Color.Purple;
-        }
+
+        return Color.Purple;
     }
 
     /// <summary>
