@@ -36,17 +36,56 @@ public class Bus
     private double velocity;
     private double controllerTriggerGas;
     private Vector controllerStickRight;
-    public double slowdownMultiplier = 1;
     private bool handbrakePressed;
 
+    /// <summary>
+    /// Muuttaa bussin nopeutta, esimerkiksi kun ajaa tien ulkopuolella
+    /// </summary>
+    public double slowdownMultiplier = 1;
+    
+    /// <summary>
+    /// Kuinka monta matkustajaa on bussissa
+    /// </summary>
     public int passengerCount = 0;
+    
+    /// <summary>
+    /// Onko bussissa stop-valo päällä (eli haulaako joku pois)
+    /// </summary>
     public bool stopping = false;
+    
+    /// <summary>
+    /// Onko bussin takaovi auki
+    /// </summary>
     public bool backdoorOpen;
+    
+    /// <summary>
+    /// Bussin sisäinen lämpötila
+    /// </summary>
     public int temperature = 20;
+    
+    /// <summary>
+    /// Yleinen vihaisuus, joka kertyy monesta eri asiasta
+    /// </summary>
     private double generalAnger;
+    
+    /// <summary>
+    /// Vihaisuus joka tulee kun et päästä matkustajia pois pysäkillä
+    /// </summary>
     public double waitingAnger = 0;
+    
+    /// <summary>
+    /// Vihaisuus joka tulee jos ajat liian hiljaa
+    /// </summary>
     public double speedAngerOffset;
+    
+    /// <summary>
+    /// Pistemäärä
+    /// </summary>
     public double score;
+    
+    /// <summary>
+    /// Pistemäärän kerroin
+    /// </summary>
     public double scoreMultiplier = 1.0;
 
     /// <summary>

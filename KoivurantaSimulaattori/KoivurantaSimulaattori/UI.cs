@@ -4,6 +4,11 @@ using Jypeli;
 
 namespace KoivurantaSimulaattori;
 
+/// @author gr313123
+/// @version 20.3.2025
+/// <summary>
+/// Sis‰lt‰‰ Pelin UI elementit
+/// </summary>
 public class UI
 {
     private readonly PhysicsGame game;

@@ -21,25 +21,66 @@ public class Road
     private const int SignSize = 256;
     private const int StopSize = 256;
     private const int GenericScoreChange = 1200;
+    private const int UpdateTickInterval = 10;
+    private const int TimeToPickUp = 4;
+    private const int TimeToDropOff = 2;
+    
+    private const double BackdoorRageIncrease = 0.0007;
 
+    /// <summary>
+    /// Lista tien pätkistä
+    /// </summary>
     public readonly List<GameObject> segments = new();
+    
+    /// <summary>
+    /// Lista pysäkkien merkeistä
+    /// </summary>
     public readonly List<GameObject> stops = new();
+    
+        
+    /// <summary>
+    /// Lista pysäkkien alueista (syvennyksistä tiessä)
+    /// </summary>
     public readonly List<GameObject> stopZones = new();
+    
+    /// <summary>
+    /// Lista tien kääntömerkeistä
+    /// </summary>
     public readonly List<GameObject> turnSigns = new();
+    
+    /// <summary>
+    /// Dictionary jossa avain on pysäkin tag, ja arvo on lista ihmisiä pysäkillä
+    /// </summary>
     public readonly Dictionary<int, List<GameObject>> people = new();
+    
+    /// <summary>
+    /// Lista ihmisisten objekteista (käytetään pelin uudelleenaloittamiseen)
+    /// </summary>
     public readonly List<GameObject> peopleObjects = new();
+    
+    /// <summary>
+    /// HashSet pysäkkien tageista, joissa on jo vierailtu
+    /// </summary>
     public readonly HashSet<int> visitedStops = new();
 
     private KoivurantaSimulaattori gameInstance;
 
-    public Bus bus;
-    public PhysicsObject busObject;
+    private Bus bus;
+    private PhysicsObject busObject;
     private bool loaded;
 
     private static readonly Logger logger = new Logger("Road.cs");
     private readonly UI gameUi = UI.GetInstance();
     private long stopEnterTime;
+    
+    /// <summary>
+    /// Viimeisen päättöpysäkin merkki
+    /// </summary>
     public GameObject finalStop;
+    
+    /// <summary>
+    /// Viimeisen päättöpysäkin syvennys
+    /// </summary>
     public GameObject finalStopZone;
 
     private int UpdateTick;
@@ -56,6 +97,7 @@ public class Road
         GenerateStops(stopSign, stopArea, person);
     }
 
+    
     private int CapAngle(int angle)
     {
         if (angle > 360)
@@ -80,6 +122,7 @@ public class Road
         return angle;
     }
 
+    
     /// <summary>
     /// Luo tien ja kyltit
     /// </summary>
@@ -194,6 +237,7 @@ public class Road
         loaded = true;
     }
 
+    
     private (GameObject, GameObject) GenerateStop(
         PhysicsGame instance,
         Vector position,
@@ -226,6 +270,7 @@ public class Road
         return (stop, stopZone);
     }
 
+    
     /// <summary>
     /// Luo pysäkit
     /// </summary>
@@ -281,11 +326,13 @@ public class Road
         }
     }
 
+    
     private bool Overlapping(double right, double left, double top, double down, GameObject comparison)
     {
         return right > comparison.Left && left < comparison.Right && top > comparison.Bottom && down < comparison.Top;
     }
 
+    
     private (GameObject, double) GetNextStopDistance()
     {
         GameObject nearest = stopZones[0];
@@ -306,6 +353,7 @@ public class Road
         return (nearest, distToNearest);
     }
 
+    
     /// <summary>
     /// Päivittää pelin UI:n, sekä tarkistaa kollisioita bussin, pysäkkien ja teiden kanssa.
     /// </summary>
@@ -343,12 +391,12 @@ public class Road
         }
 
 
-        if (UpdateTick % 10 == 0)
+        if (UpdateTick % UpdateTickInterval == 0)
         {
             (GameObject _, double distance) = GetNextStopDistance();
             gameUi.UpdateDistance(distance);
 
-            if (UpdateTick / 10 == RandomGen.NextInt(30) && distance > 50 && bus.passengerCount >= 1)
+            if (UpdateTick / UpdateTickInterval == RandomGen.NextInt(30) && distance > 50 && bus.passengerCount >= 1)
             {
                 bus.stopping = true;
                 gameUi.ShowStop();
@@ -386,11 +434,11 @@ public class Road
             gameUi.UpdateBackDoorRequirement(bus.backdoorOpen);
             if (bus.backdoorOpen)
             {
-                bus.IncreaseAnger(0.0007);
+                bus.IncreaseAnger(BackdoorRageIncrease);
             }
             else
             {
-                bus.DecreaseAnger(0.0014);
+                bus.DecreaseAnger(BackdoorRageIncrease*2);
             }
         }
 
@@ -406,7 +454,7 @@ public class Road
                 long timeOnStop = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - stopEnterTime;
                 gameUi.UpdateCountdown(timeOnStop);
 
-                if (timeOnStop >= 2 && bus.stopping)
+                if (timeOnStop >= TimeToDropOff && bus.stopping)
                 {
                     if (!bus.backdoorOpen)
                     {
@@ -428,7 +476,7 @@ public class Road
                     }
                 }
 
-                if (timeOnStop >= 4 && !visitedStops.Contains(stopNumber) && stopNumber != -1)
+                if (timeOnStop >= TimeToPickUp && !visitedStops.Contains(stopNumber) && stopNumber != -1)
                 {
                     foreach (GameObject person in people[stopNumber])
                     {
@@ -460,6 +508,7 @@ public class Road
         }
     }
 
+    
     /// <summary>
     /// Asettaa bussin objektin
     /// </summary>
