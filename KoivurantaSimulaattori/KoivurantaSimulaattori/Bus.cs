@@ -119,9 +119,11 @@ public class Bus
         if(temp >= 20)
         {
             index = Math.Pow(temperature - 20, 2) / 10.0 / 100;
-        } 
-        
-        index = -Math.Pow(temperature - 25, 3) / 100.0 / 100;
+        }
+        else
+        {
+            index = -Math.Pow(temperature - 25, 3) / 100.0 / 100;
+        }
 
         return Math.Min(1, Math.Max(index, 0));
     }
