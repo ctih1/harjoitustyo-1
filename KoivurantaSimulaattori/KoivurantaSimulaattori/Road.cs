@@ -147,17 +147,14 @@ public class Road
                     rotationPiece.Y = segments.Last().Y + b;
 
                     rotationPiece.Image = roadSegmentTexture;
-
-
+                    
                     segments.Add(rotationPiece);
-
                     gameInstance.Add(rotationPiece, -2);
 
                     currentY += (int)b;
                     currentX += (int)a;
                 }
-
-
+                
                 currentRotation = turnAngle;
             }
 
@@ -293,6 +290,7 @@ public class Road
     {
         GameObject nearest = stopZones[0];
         double distToNearest = busObject.Position.Distance(nearest.Position);
+        
         foreach (GameObject stopZone in stopZones)
         {
             if (visitedStops.Contains((int)stopZone.Tag)) continue;
@@ -333,7 +331,6 @@ public class Road
         }
 
         GameObject overlappingStop = null;
-
         foreach (GameObject stopZone in stopZones)
         {
             if (Overlapping(busRight, busLeft, busTop, busDown, stopZone))
@@ -445,6 +442,7 @@ public class Road
                 }
             }
         }
+        
         else if (stopEnterTime != 0)
         {
             stopEnterTime = 0;

@@ -42,7 +42,7 @@ public class KoivurantaSimulaattori : PhysicsGame
         busZone = VerboseImageLoad("busstop");
         busStop = VerboseImageLoad("stop");
         person = VerboseImageLoad("person");
-        Level.BackgroundColor = Color.Gray;
+        Level.BackgroundColor = Color.SkyBlue;
 
         gameUi = new UI(this, busStop);
 
@@ -141,7 +141,7 @@ public class KoivurantaSimulaattori : PhysicsGame
             scoreList, score
         );
 
-        window.Closed += (_) => { SaveScores(); };
+        window.Closed += _ => { SaveScores(); };
         Add(window);
         highScoreOpen = true;
     }
