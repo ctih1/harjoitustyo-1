@@ -153,6 +153,10 @@ public class KoivurantaSimulaattori : PhysicsGame
     }
 
     
+    /// <summary>
+    /// Päivittää pelin sekä tien ja bussin fysiikat
+    /// </summary>
+    /// <param name="time">Tämän hetkinen aika</param>
     protected override void Update(Time time)
     {
         Stopwatch sw = Stopwatch.StartNew();

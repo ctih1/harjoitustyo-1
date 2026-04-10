@@ -98,6 +98,9 @@ public class Road
     }
 
     
+    /// <summary>
+    /// Rajoittaa arvon 360 asteeseen
+    /// </summary>
     private int CapAngle(int angle)
     {
         if (angle > 360)
@@ -238,6 +241,9 @@ public class Road
     }
 
     
+    /// <summary>
+    /// Luo pysäkin tietylle kohdalle.
+    /// </summary>
     private (GameObject, GameObject) GenerateStop(
         PhysicsGame instance,
         Vector position,
@@ -327,12 +333,18 @@ public class Road
     }
 
     
+    /// <summary>
+    /// Tarkistaa ovatko kaksi kappaletta päällekkäin
+    /// </summary>
     private bool Overlapping(double right, double left, double top, double down, GameObject comparison)
     {
         return right > comparison.Left && left < comparison.Right && top > comparison.Bottom && down < comparison.Top;
     }
 
     
+    /// <summary>
+    /// Palauttaa lähimmän pysäkin objektin sekä sen etäisyydenm, jos pysäkillä ei ole käyty
+    /// </summary>
     private (GameObject, double) GetNextStopDistance()
     {
         GameObject nearest = stopZones[0];

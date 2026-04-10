@@ -33,6 +33,10 @@ public class UI
 
     private static UI instance;
 
+    
+    /// <summary>
+    /// Luo labelin arvoilla
+    /// </summary>
     private Label CreateLabel(double x, double y, string text = "Unset")
     {
         Label baseLabel = new Label();
@@ -47,6 +51,9 @@ public class UI
         return baseLabel;
     }
 
+    /// <summary>
+    /// Luo linjan arvoilla
+    /// </summary>
     private Label CreateLine(double y, double width, Color color, string label)
     {
         Label line = new Label
@@ -82,18 +89,36 @@ public class UI
 
         return line;
     }
+    
+    /// <summary>
+    /// Asettaa linjan asennon koon muutoksen j‰lkeem
+    /// <param name="line">Linja jota pit‰‰ muuttaa</param>
+    /// <param name="xOffset">Mahdollinen lis‰et‰isyys sivusta</param>
+    /// </summary>
 
     public void PositionLine(Label line, double xOffset = 0.0)
     {
         line.Position = new Vector(screen.Left + line.Width / 2.0 + xOffset, line.Position.Y);
     }
 
+    
+    /// <summary>
+    /// Muuttaa linjan pituuden ja vaihtaa paikkaa
+    /// <param name="primaryLine">Linja jota muutetaan</param>
+    /// <param name="width">Maksimi pituus</param>
+    /// <param name="relativeValue">Arvo (0-1 v‰lill‰)</param>
+    /// </summary>
     private void UpdateLine(Label primaryLine, double width, double relativeValue)
     {
         primaryLine.Width = width * Math.Max(0, relativeValue);
         PositionLine(primaryLine);
     }
 
+    /// <summary>
+    /// Luo uuden UI instancen.
+    /// </summary>
+    /// <param name="game">Pelin instance</param>
+    /// <param name="busStop">Kuva bussipys‰kista</param>
     public UI(PhysicsGame game, Image busStop)
     {
         this.game = game;
@@ -186,11 +211,19 @@ public class UI
         instance = this;
     }
 
+    
+    /// <summary>
+    /// Hankkii valmiin UI:n instancen
+    /// </summary>
     public static UI GetInstance()
     {
         return instance;
     }
 
+    /// <summary>
+    /// P‰ivitt‰‰ nopeusmittarin nopeutta
+    /// </summary>
+    /// <param name="speed">Nopeus (kmh)</param>
     public void UpdateSpeedo(double speed)
     {
         speedometer.Text = speed + "km/h";
@@ -271,6 +304,11 @@ public class UI
         PositionLine(backdoorStatus, 4);
     }
 
+    /// <summary>
+    /// P‰ivitt‰‰ taka-oven asentoa
+    /// </summary>
+    /// <param name="amount">Relatiivinen arvo (0-1), jossa 1 on huonoin</param>
+    /// <returns>V‰rin joka vastaa arvoa</returns>
     private Color GetRangeColor(double amount)
     {
         if (amount < 0.3)
@@ -325,6 +363,11 @@ public class UI
         PositionLine(temperature, 4);
     }
 
+    /// <summary>
+    /// Muuttaa tekstin v‰rin joko vihre‰ksi tai punaiseksi
+    /// </summary>
+    /// <param name="label">Label jonka v‰ri‰ muutetaan</param>
+    /// <param name="condition">Toteutuuko, eli true = vihre‰, false = punainen</param>
     private void UpdateBoolColor(Label label, bool condition)
     {
         label.TextColor = condition ? Color.Green : Color.Red;
