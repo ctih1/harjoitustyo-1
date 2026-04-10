@@ -7,7 +7,7 @@ public class Logger
 {
     private readonly string name;
     private readonly string logPath = Path.GetTempPath() + "jypeli.log";
-    
+
     public Logger(string name)
     {
         this.name = name;

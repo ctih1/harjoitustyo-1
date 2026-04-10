@@ -27,8 +27,8 @@ public class Bus
     private const double ControllerAccelerationMultiplier = 0.07;
     private const int TurningVelocityMultiplier = 200;
     private const double KmhVelocityMultiplier = 1.4;
-    
-    private static readonly Logger logger = new ("bus.cs");
+
+    private static readonly Logger logger = new("bus.cs");
     private readonly PhysicsObject bus;
     private readonly UI gameUi;
 
@@ -48,7 +48,7 @@ public class Bus
     public double speedAngerOffset;
     public double score;
     public double scoreMultiplier = 1.0;
-    
+
     /// <summary>
     /// Luo bussi-objektin
     /// </summary>
@@ -58,11 +58,11 @@ public class Bus
         bus = new PhysicsObject(50, 175);
         bus.Shape = Shape.Rectangle;
         bus.Color = Color.Yellow;
-        
+
         gameUi = UI.GetInstance();
     }
 
-        
+
     /// <summary>
     /// Palauttaa bussin PhysicsObjektin
     /// </summary>
@@ -87,7 +87,7 @@ public class Bus
             velocity += 0.2;
         }
     }
-    
+
     /// <summary>
     /// Laittaa käsijarrun päälle
     /// </summary>
@@ -103,13 +103,13 @@ public class Bus
         {
             velocity += 0.4;
         }
-        if(velocity > 3)
+
+        if (velocity > 3)
         {
             IncreaseAnger(velocity / 10000);
-
         }
     }
-       
+
     /// <summary>
     /// Poistaa käsijarrun käytöstä
     /// </summary>
@@ -119,7 +119,7 @@ public class Bus
         handbrakePressed = false;
     }
 
-           
+
     /// <summary>
     /// Poistaa käsijarrun käytöstä
     /// </summary>
@@ -128,31 +128,36 @@ public class Bus
     private double CalculateHeatAnger(double temp)
     {
         double index;
-        if(temp >= OptimalTemperature)
+        if (temp >= OptimalTemperature)
         {
             index = Math.Pow(temperature - OptimalTemperature, 2) / 10.0 / 100;
         }
         else
         {
-            index = -Math.Pow(temperature - (OptimalTemperature+5), 3) / 100.0 / 100;
+            index = -Math.Pow(temperature - (OptimalTemperature + 5), 3) / 100.0 / 100;
         }
 
         return Math.Min(1, Math.Max(index, 0));
     }
-    
+
     /// <summary>
     /// Bussin päivitysfunktio, joka päivittää sen position, kulman, ja UI elementtejä
     /// </summary>
     public void GameLoop()
     {
-        velocity += (controllerTriggerGas*ControllerAccelerationMultiplier);
-        turningVelocity += (-controllerStickRight.X)*ControllerTurningVelocityMultiplier;
-        
-        if (turningVelocity is < TurningVelocityDeadZone and > -TurningVelocityDeadZone) {
+        velocity += (controllerTriggerGas * ControllerAccelerationMultiplier);
+        turningVelocity += (-controllerStickRight.X) * ControllerTurningVelocityMultiplier;
+
+        if (turningVelocity is < TurningVelocityDeadZone and > -TurningVelocityDeadZone)
+        {
             turningVelocity = 0;
-        } else if (turningVelocity > 0) {
+        }
+        else if (turningVelocity > 0)
+        {
             turningVelocity -= TurnSlowdownSpeed;
-        } else if (turningVelocity < 0) {
+        }
+        else if (turningVelocity < 0)
+        {
             turningVelocity += TurnSlowdownSpeed;
         }
 
@@ -166,27 +171,33 @@ public class Bus
             turningVelocity = -MaxTurnVelocity;
         }
 
-        if (velocity is < VelocityDeadZone and > -VelocityDeadZone) {
-            velocity = 0;
-        } else if (velocity > 0) {
-            velocity -= SlowdownSpeed*slowdownMultiplier;
-        } else if (velocity < 0)
+        if (velocity is < VelocityDeadZone and > -VelocityDeadZone)
         {
-            velocity += SlowdownSpeed*slowdownMultiplier;
+            velocity = 0;
         }
-        
+        else if (velocity > 0)
+        {
+            velocity -= SlowdownSpeed * slowdownMultiplier;
+        }
+        else if (velocity < 0)
+        {
+            velocity += SlowdownSpeed * slowdownMultiplier;
+        }
+
         velocity = Math.Min(velocity, MaxVelocity);
-        turningVelocity = turningVelocity * Math.Min(1, Math.Abs(velocity*TurningVelocityMultiplier)) * (!handbrakePressed).GetHashCode();
+        turningVelocity = turningVelocity * Math.Min(1, Math.Abs(velocity * TurningVelocityMultiplier)) *
+                          (!handbrakePressed).GetHashCode();
         bus.Velocity = new Vector(Math.Sin(bus.Angle.Radians), -Math.Cos(bus.Angle.Radians));
         bus.Velocity = bus.Velocity * Speed * -velocity;
 
         double kmh = Math.Max(0, Math.Round(velocity * KmhVelocityMultiplier));
         gameUi.UpdateSpeedo(kmh);
 
-        if(kmh < MinimumSpeedForGoal)
+        if (kmh < MinimumSpeedForGoal)
         {
             speedAngerOffset += SpeedAngerOffsetIncrease;
-        } else
+        }
+        else
         {
             speedAngerOffset -= SpeedAngerOffsetIncrease;
         }
@@ -200,13 +211,13 @@ public class Bus
         double totalAnger = Math.Max(0, heatHate + waitingAnger + generalAnger + speedAngerOffset);
         gameUi.UpdateAnger(totalAnger);
         gameUi.UpdateHates(heatHate, waitingAnger, generalAnger, speedAngerOffset);
-        
+
         if (totalAnger > 0.9)
         {
             scoreMultiplier = 0.4;
             gameUi.UpdateScoreMultiplier(scoreMultiplier);
         }
-        else if(totalAnger is > 0.7 and < 0.9)
+        else if (totalAnger is > 0.7 and < 0.9)
         {
             scoreMultiplier = 1.4;
             gameUi.UpdateScoreMultiplier(scoreMultiplier);
@@ -221,7 +232,7 @@ public class Bus
             gameUi.UpdateScoreMultiplier(scoreMultiplier);
         }
 
-        ChangeScore(kmh/100);
+        ChangeScore(kmh / 100);
 
         Angle angle = Angle.FromDegrees(bus.Angle.Degrees + TurningSpeed * turningVelocity);
         bus.Angle = angle;
@@ -241,7 +252,7 @@ public class Bus
         temperature = OptimalTemperature;
         backdoorOpen = false;
     }
-    
+
     /// <summary>
     /// Liikuttaa bussia vektorin suuntaan
     /// </summary>
@@ -302,7 +313,7 @@ public class Bus
     /// </summary>
     public void DecreaseTemperature()
     {
-        temperature = Math.Max(0, temperature -1);
+        temperature = Math.Max(0, temperature - 1);
         gameUi.UpdateTemperature(temperature);
     }
 
@@ -321,7 +332,7 @@ public class Bus
     {
         SetAnger(generalAnger + amount);
     }
-    
+
     /// <summary>
     /// Laskee yleistä raivoisuutta
     /// </summary>
@@ -330,7 +341,7 @@ public class Bus
         SetAnger(generalAnger - amount);
     }
 
-    
+
     /// <summary>
     /// Vaihtaa pisteitä
     /// </summary>
@@ -340,5 +351,4 @@ public class Bus
         score += amount * scoreMultiplier;
         gameUi.UpdateScoreText(score);
     }
-
 }

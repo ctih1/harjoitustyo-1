@@ -1,10 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.Encodings.Web;
 using Jypeli;
-using Jypeli.Widgets;
-using SixLabors.ImageSharp.ColorSpaces;
 
 namespace KoivurantaSimulaattori;
 
@@ -27,7 +23,7 @@ public class UI
     private readonly Label scoreText;
     private readonly Label scoreMultiplierText;
 
-    private readonly List<Label> requirements = new ();
+    private readonly List<Label> requirements = new();
     private readonly ScreenView screen;
 
     private static UI instance;
@@ -35,7 +31,7 @@ public class UI
     private Label CreateLabel(double x, double y, string text = "Unset")
     {
         Label baseLabel = new Label();
-        
+
         baseLabel.Font = Font.DefaultBold;
         baseLabel.TextColor = Color.White;
         baseLabel.Text = text;
@@ -46,9 +42,10 @@ public class UI
         return baseLabel;
     }
 
-    private (Label, Label) CreateLine(double y, double width, Color color, string label)
+    private Label CreateLine(double y, double width, Color color, string label)
     {
-        Label line = new Label {
+        Label line = new Label
+        {
             Y = y,
             SizeMode = TextSizeMode.None,
             Color = color,
@@ -74,11 +71,11 @@ public class UI
         PositionLine(background);
         PositionLine(hint, 4);
 
-        this.game.Add(background);
-        this.game.Add(line);
-        this.game.Add(hint);
+        game.Add(background);
+        game.Add(line);
+        game.Add(hint);
 
-        return (line, background);
+        return line;
     }
 
     public void PositionLine(Label line, double xOffset = 0.0)
@@ -97,22 +94,22 @@ public class UI
         this.game = game;
         screen = Game.Screen;
 
-        speedometer = CreateLabel(screen.RightSafe - 70, screen.BottomSafe+60);
+        speedometer = CreateLabel(screen.RightSafe - 70, screen.BottomSafe + 60);
         speedometer.Font = new Font(50);
 
-        (stopTime, _) = CreateLine(screen.Top - 250, 300, Color.Blue, "Aikaa pys‰kill‰:");
+        stopTime = CreateLine(screen.Top - 250, 300, Color.Blue, "Aikaa pys‰kill‰:");
 
-        passengerCount = CreateLabel(screen.LeftSafe + 50, screen.TopSafe-20);
+        passengerCount = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 20);
         backdoorStatus = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 40);
         distanceToStop = CreateLabel(screen.LeftSafe + 50, screen.Top - 280);
         temperature = CreateLabel(screen.LeftSafe + 50, screen.TopSafe - 500);
-        (anger, _) = CreateLine(screen.BottomSafe + 20, screen.Width, Color.Red, "Asiakkaiden vihaisuus:");
+        anger = CreateLine(screen.BottomSafe + 20, screen.Width, Color.Red, "Asiakkaiden vihaisuus:");
 
 
-        (generalHateBar, _) = CreateLine(screen.BottomSafe + 70, 100, Color.Orange, "Ajotyyli ‰rsytt‰‰");
-        (heatHateBar, _) = CreateLine(screen.BottomSafe + 120, 100, Color.Orange, "L‰mpˆtila ‰rsytt‰‰");
-        (waitHateBar, _) = CreateLine(screen.BottomSafe + 170, 100, Color.Orange, "Odotus ‰rsytt‰‰");
-        (speedHateBar, _) = CreateLine(screen.BottomSafe + 220, 100, Color.Orange, "Nopeus ‰rsytt‰‰");
+        generalHateBar = CreateLine(screen.BottomSafe + 70, 100, Color.Orange, "Ajotyyli ‰rsytt‰‰");
+        heatHateBar = CreateLine(screen.BottomSafe + 120, 100, Color.Orange, "L‰mpˆtila ‰rsytt‰‰");
+        waitHateBar = CreateLine(screen.BottomSafe + 170, 100, Color.Orange, "Odotus ‰rsytt‰‰");
+        speedHateBar = CreateLine(screen.BottomSafe + 220, 100, Color.Orange, "Nopeus ‰rsytt‰‰");
 
         scoreText = new Label
         {
@@ -133,19 +130,24 @@ public class UI
         stopMark.Image.Scaling = ImageScaling.Nearest;
         stopMark.Size = new Vector(200, 62);
         stopMark.X = 0;
-        stopMark.Y = screen.TopSafe-62;
+        stopMark.Y = screen.TopSafe - 62;
 
         Label guidelineTitle = CreateLabel(screen.Right - 200, screen.TopSafe - 120, "Koivuranta Ohjeet");
         guidelineTitle.TextColor = Color.Black;
 
 
-        Label guidelineDescription = CreateLabel(screen.Right - 200, screen.TopSafe - 165, "Yleisi‰ ohjeita liittyen\nasiakkaiden hyvinvointiin");
+        Label guidelineDescription = CreateLabel(screen.Right - 200, screen.TopSafe - 165,
+            "Yleisi‰ ohjeita liittyen\nasiakkaiden hyvinvointiin");
         guidelineDescription.TextColor = Color.Black;
         guidelineDescription.Font = new Font(20);
 
-        string[] reqs = ["Patteri on mahdollisimman kovalla", "Ajoneuvon nopeus on alle 30 kmh", "Takaovi pidetty kiinni pys‰kill‰", "Takaovi auki ajon aikana"];
+        string[] reqs =
+        [
+            "Patteri on mahdollisimman kovalla", "Ajoneuvon nopeus on alle 30 kmh", "Takaovi pidetty kiinni pys‰kill‰",
+            "Takaovi auki ajon aikana"
+        ];
 
-        for(int i=0; i<reqs.Length; i++)
+        for (int i = 0; i < reqs.Length; i++)
         {
             string text = reqs[i];
             Label reqLabel = CreateLabel(screen.Right - 200, screen.TopSafe - 200 - (25 * (i + 1)));
@@ -186,7 +188,7 @@ public class UI
 
     public void UpdateSpeedo(double speed)
     {
-        speedometer.Text = string.Format("{0} km/h", speed);
+        speedometer.Text = speed + "km/h";
     }
 
 
@@ -199,6 +201,7 @@ public class UI
         distanceToStop.Text = Math.Round(distance) / 100 + " metri‰ l‰himm‰lle pys‰kille";
         PositionLine(distanceToStop, 4);
     }
+
     /// <summary>
     /// N‰ytt‰‰ bussin STOP-merkin
     /// </summary>
@@ -206,7 +209,7 @@ public class UI
     {
         stopMark.X = 0;
     }
-    
+
     /// <summary>
     /// Piilottaa bussin STOP-merkin
     /// </summary>
@@ -214,7 +217,7 @@ public class UI
     {
         stopMark.X = -500000;
     }
-    
+
     /// <summary>
     /// P‰ivitt‰‰ piste-teksti‰
     /// </summary>
@@ -230,9 +233,8 @@ public class UI
     /// <param name="multiplier">Pisteen kerroin</param>
     public void UpdateScoreMultiplier(double multiplier)
     {
-        scoreMultiplierText.Text = (Math.Round(multiplier * 100) / 100).ToString() + "x";
+        scoreMultiplierText.Text = (Math.Round(multiplier * 100) / 100) + "x";
     }
-
 
 
     /// <summary>
@@ -286,7 +288,7 @@ public class UI
         {
             return Color.Purple;
         }
-    } 
+    }
 
     /// <summary>
     /// P‰ivitt‰‰ yhteist‰ raivoa
@@ -294,30 +296,30 @@ public class UI
     /// <param name="amount">Yhteisen vihan m‰‰r‰ (0-1)</param>
     public void UpdateAnger(double amount)
     {
-        anger.Text = "Viha: " + Math.Round(amount*100).ToString() + "%";
+        anger.Text = "Viha: " + Math.Round(amount * 100) + "%";
         UpdateLine(anger, screen.Width, amount);
         anger.Color = GetRangeColor(amount);
-        
+
 
         anger.TextColor = Color.White;
-
     }
 
     /// <summary>
     /// P‰ivitt‰‰ sis‰ist‰ l‰mpˆtilaa
     /// </summary>
-    /// <param name="temperature">L‰mpˆ bussin sis‰ll‰</param>
-    public void UpdateTemperature(int temperature)
+    /// <param name="newTemperature">L‰mpˆ bussin sis‰ll‰</param>
+    public void UpdateTemperature(int newTemperature)
     {
-        if(temperature > 0)
+        if (newTemperature > 0)
         {
-            this.temperature.Text = "Patterin l‰mpˆtila: " + temperature.ToString() + " *C";
-
-        } else
-        {
-            this.temperature.Text = "Patteri pois p‰‰lt‰";
+            temperature.Text = "Patterin l‰mpˆtila: " + newTemperature + " *C";
         }
-        PositionLine(this.temperature, 4);
+        else
+        {
+            temperature.Text = "Patteri pois p‰‰lt‰";
+        }
+
+        PositionLine(temperature, 4);
     }
 
     private void UpdateBoolColor(Label label, bool condition)
@@ -325,7 +327,7 @@ public class UI
         label.TextColor = condition ? Color.Green : Color.Red;
     }
 
-    
+
     /// <summary>
     /// P‰ivitt‰‰ takaoven ehtoa pys‰kill‰
     /// </summary>
@@ -335,7 +337,7 @@ public class UI
         UpdateBoolColor(requirements[2], status);
     }
 
-        
+
     /// <summary>
     /// P‰ivitt‰‰ nopeuden ehtoa
     /// </summary>
