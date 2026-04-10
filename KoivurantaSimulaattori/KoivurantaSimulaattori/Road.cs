@@ -27,6 +27,7 @@ public class Road
     public readonly List<GameObject> stopZones = new ();
     public readonly List<GameObject> turnSigns = new ();
     public readonly Dictionary<int, List<GameObject>> people = new ();
+    public readonly List<GameObject> peopleObjects = new();
     public readonly HashSet<int> visitedStops = new ();
 
     private KoivurantaSimulaattori gameInstance;
@@ -271,7 +272,7 @@ public class Road
                 person.Image = personImage;
                 person.Position = new Vector(stop.X - RandomGen.NextInt(100), stop.Y - RandomGen.NextInt(100));
                 peopleList.Add(person);
-
+                peopleObjects.Add(person);
                 gameInstance.Add(person);
             }
             people.Add(i, peopleList);
@@ -361,10 +362,10 @@ public class Road
 
         if (isOnRoad || onStop)
         {
-            bus.SlowdownMultiplier = 1;
+            bus.slowdownMultiplier = 1;
             busObject.Color = Color.Yellow;
         } else {
-            bus.SlowdownMultiplier = 3;
+            bus.slowdownMultiplier = 3;
             busObject.Color = Color.Red;
         }
 

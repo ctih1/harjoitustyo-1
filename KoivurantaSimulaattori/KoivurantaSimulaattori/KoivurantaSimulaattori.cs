@@ -100,6 +100,7 @@ public class KoivurantaSimulaattori : PhysicsGame
         DestroyList(road.stops);
         DestroyList(road.stopZones);
         DestroyList(road.turnSigns);
+        DestroyList(road.peopleObjects);
 
         road.finalStop.Destroy();
         road.finalStopZone.Destroy();

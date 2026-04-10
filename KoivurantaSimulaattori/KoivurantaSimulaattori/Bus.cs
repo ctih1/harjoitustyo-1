@@ -10,21 +10,33 @@ namespace KoivurantaSimulaattori;
 /// </summary>
 public class Bus
 {
+    private const int Speed = 100;
+    private const int TurningSpeed = 5;
+    private const double SlowdownSpeed = 0.02;
+    private const double TurnSlowdownSpeed = 0.2;
+    private const double MaxTurnVelocity = 2.5;
+    private const int MaxVelocity = 800;
+    private const int OptimalTemperature = 20;
+    private const double VelocityDeadZone = 0.05;
+    private const double TurningVelocityDeadZone = 0.15;
+    private const double SpeedAngerOffsetIncrease = 0.0003;
+    private const double SpeedAngerIncreaseLimit = 0.3;
+    private const int MinimumHeatForGoal = 35;
+    private const int MinimumSpeedForGoal = 40;
+    private const double ControllerTurningVelocityMultiplier = 0.28;
+    private const double ControllerAccelerationMultiplier = 0.07;
+    private const int TurningVelocityMultiplier = 200;
+    private const double KmhVelocityMultiplier = 1.4;
+    
+    private static readonly Logger logger = new ("bus.cs");
     private readonly PhysicsObject bus;
-    private static readonly int SPEED = 100;
-    private static readonly int TURNING_SPEED = 5;
-    private static readonly double SLOWDOWN_SPEED = 0.02;
-    private static readonly double TURN_SLOWDOWN_SPEED = 0.2;
-    private static readonly double MAX_TURN_VELOCITY = 2.5;
-    private static readonly int MAX_VELOCITY = 800;
-    private static readonly Logger logger = new Logger("bus.cs");
     private readonly UI gameUi;
 
-    private double TurningVelocity;
-    private double Velocity;
-    private double ControllerTriggerGas;
-    private Vector ControllerStickRight;
-    public double SlowdownMultiplier = 1;
+    private double turningVelocity;
+    private double velocity;
+    private double controllerTriggerGas;
+    private Vector controllerStickRight;
+    public double slowdownMultiplier = 1;
     private bool handbrakePressed;
 
     public int passengerCount = 0;
@@ -57,7 +69,7 @@ public class Bus
     public PhysicsObject GetObject()
     {
         logger.Info("Returning bus");
-        return this.bus;
+        return bus;
     }
 
     /// <summary>
@@ -66,13 +78,13 @@ public class Bus
     public void Brake()
     {
         logger.Debug("Breaking");
-        if (Velocity > 0)
+        if (velocity > 0)
         {
-            Velocity -= 0.2;
+            velocity -= 0.2;
         }
         else
         {
-            Velocity += 0.2;
+            velocity += 0.2;
         }
     }
     
@@ -83,17 +95,17 @@ public class Bus
     {
         logger.Debug("Handbrake activated");
         handbrakePressed = true;
-        if (Velocity > 0)
+        if (velocity > 0)
         {
-            Velocity -= 0.4;
+            velocity -= 0.4;
         }
         else
         {
-            Velocity += 0.4;
+            velocity += 0.4;
         }
-        if(Velocity > 3)
+        if(velocity > 3)
         {
-            IncreaseAnger(Velocity / 10000);
+            IncreaseAnger(velocity / 10000);
 
         }
     }
@@ -116,13 +128,13 @@ public class Bus
     private double CalculateHeatAnger(double temp)
     {
         double index;
-        if(temp >= 20)
+        if(temp >= OptimalTemperature)
         {
-            index = Math.Pow(temperature - 20, 2) / 10.0 / 100;
+            index = Math.Pow(temperature - OptimalTemperature, 2) / 10.0 / 100;
         }
         else
         {
-            index = -Math.Pow(temperature - 25, 3) / 100.0 / 100;
+            index = -Math.Pow(temperature - (OptimalTemperature+5), 3) / 100.0 / 100;
         }
 
         return Math.Min(1, Math.Max(index, 0));
@@ -133,55 +145,56 @@ public class Bus
     /// </summary>
     public void GameLoop()
     {
-        Velocity += (ControllerTriggerGas*0.07);
-        TurningVelocity += (-ControllerStickRight.X)*0.28;
-        if (TurningVelocity is < 0.15 and > -0.15) {
-            TurningVelocity = 0;
-        } else if (TurningVelocity > 0) {
-            TurningVelocity -= TURN_SLOWDOWN_SPEED;
-        } else if (TurningVelocity < 0) {
-            TurningVelocity += TURN_SLOWDOWN_SPEED;
+        velocity += (controllerTriggerGas*ControllerAccelerationMultiplier);
+        turningVelocity += (-controllerStickRight.X)*ControllerTurningVelocityMultiplier;
+        
+        if (turningVelocity is < TurningVelocityDeadZone and > -TurningVelocityDeadZone) {
+            turningVelocity = 0;
+        } else if (turningVelocity > 0) {
+            turningVelocity -= TurnSlowdownSpeed;
+        } else if (turningVelocity < 0) {
+            turningVelocity += TurnSlowdownSpeed;
         }
 
-        if (TurningVelocity > MAX_TURN_VELOCITY)
+        if (turningVelocity > MaxTurnVelocity)
         {
-            TurningVelocity = MAX_TURN_VELOCITY;
+            turningVelocity = MaxTurnVelocity;
         }
 
-        if (TurningVelocity < -MAX_TURN_VELOCITY)
+        if (turningVelocity < -MaxTurnVelocity)
         {
-            TurningVelocity = -MAX_TURN_VELOCITY;
+            turningVelocity = -MaxTurnVelocity;
         }
 
-        if (Velocity is < 0.05 and > -0.05) {
-            Velocity = 0;
-        } else if (Velocity > 0) {
-            Velocity -= SLOWDOWN_SPEED*SlowdownMultiplier;
-        } else if (Velocity < 0)
+        if (velocity is < VelocityDeadZone and > -VelocityDeadZone) {
+            velocity = 0;
+        } else if (velocity > 0) {
+            velocity -= SlowdownSpeed*slowdownMultiplier;
+        } else if (velocity < 0)
         {
-            Velocity += SLOWDOWN_SPEED*SlowdownMultiplier;
+            velocity += SlowdownSpeed*slowdownMultiplier;
         }
         
-        Velocity = Math.Min(Velocity, MAX_VELOCITY);
-        TurningVelocity = TurningVelocity * Math.Min(1, Math.Abs(Velocity*200)) * (!handbrakePressed).GetHashCode();
+        velocity = Math.Min(velocity, MaxVelocity);
+        turningVelocity = turningVelocity * Math.Min(1, Math.Abs(velocity*TurningVelocityMultiplier)) * (!handbrakePressed).GetHashCode();
         bus.Velocity = new Vector(Math.Sin(bus.Angle.Radians), -Math.Cos(bus.Angle.Radians));
-        bus.Velocity = bus.Velocity * SPEED * -Velocity;
+        bus.Velocity = bus.Velocity * Speed * -velocity;
 
-        double kmh = Math.Max(0, Math.Round(Velocity * 1.4));
+        double kmh = Math.Max(0, Math.Round(velocity * KmhVelocityMultiplier));
         gameUi.UpdateSpeedo(kmh);
 
-        if(kmh < 40)
+        if(kmh < MinimumSpeedForGoal)
         {
-            speedAngerOffset += 0.0003;
+            speedAngerOffset += SpeedAngerOffsetIncrease;
         } else
         {
-            speedAngerOffset -= 0.0003;
+            speedAngerOffset -= SpeedAngerOffsetIncrease;
         }
 
-        speedAngerOffset = Math.Min(0.3, Math.Max(speedAngerOffset, -0.3));
+        speedAngerOffset = Math.Min(SpeedAngerIncreaseLimit, Math.Max(speedAngerOffset, -SpeedAngerIncreaseLimit));
 
-        gameUi.UpdateHeatRequirement(temperature > 35);
-        gameUi.UpdateSpeedRequirement(kmh < 40);
+        gameUi.UpdateHeatRequirement(temperature > MinimumHeatForGoal);
+        gameUi.UpdateSpeedRequirement(kmh < MinimumSpeedForGoal);
 
         double heatHate = CalculateHeatAnger(temperature);
         double totalAnger = Math.Max(0, heatHate + waitingAnger + generalAnger + speedAngerOffset);
@@ -210,7 +223,7 @@ public class Bus
 
         ChangeScore(kmh/100);
 
-        Angle angle = Angle.FromDegrees(bus.Angle.Degrees + TURNING_SPEED * TurningVelocity);
+        Angle angle = Angle.FromDegrees(bus.Angle.Degrees + TurningSpeed * turningVelocity);
         bus.Angle = angle;
     }
 
@@ -221,11 +234,11 @@ public class Bus
     {
         bus.Position = new Vector(0, 0);
         bus.Angle = Angle.Zero;
-        Velocity = 0;
-        TurningVelocity = 0;
+        velocity = 0;
+        turningVelocity = 0;
         score = 0;
         scoreMultiplier = 1.0;
-        temperature = 20;
+        temperature = OptimalTemperature;
         backdoorOpen = false;
     }
     
@@ -235,8 +248,8 @@ public class Bus
     /// <param name="direction">Liikkumisen suunta</param>
     public void Move(Vector direction)
     {
-        TurningVelocity += direction.X * -0.21;
-        Velocity += direction.Y * 0.07;
+        turningVelocity += direction.X * -0.21;
+        velocity += direction.Y * 0.07;
     }
 
     /// <summary>
@@ -253,7 +266,7 @@ public class Bus
     /// <param name="state">AnalogState, joka vastaa ohjaimen tikkua.</param>
     public void StickMove(AnalogState state)
     {
-        ControllerStickRight = state.StateVector;
+        controllerStickRight = state.StateVector;
     }
 
     /// <summary>
@@ -262,7 +275,7 @@ public class Bus
     /// <param name="state">AnalogState, joka vastaa ohjaimen triggerin arvoa.</param>
     public void TriggerAccel(AnalogState state)
     {
-        ControllerTriggerGas = (state.State + 1) / 2.0;
+        controllerTriggerGas = (state.State + 1) / 2.0;
     }
 
     /// <summary>
@@ -298,7 +311,7 @@ public class Bus
     /// </summary>
     public void SetAnger(double anger)
     {
-        this.generalAnger = Math.Max(0, Math.Min(anger, 0.7));
+        generalAnger = Math.Max(0, Math.Min(anger, 0.7));
     }
 
     /// <summary>
@@ -306,7 +319,7 @@ public class Bus
     /// </summary>
     public void IncreaseAnger(double amount)
     {
-        SetAnger(this.generalAnger + amount);
+        SetAnger(generalAnger + amount);
     }
     
     /// <summary>
@@ -314,7 +327,7 @@ public class Bus
     /// </summary>
     public void DecreaseAnger(double amount)
     {
-        SetAnger(this.generalAnger - amount);
+        SetAnger(generalAnger - amount);
     }
 
     
