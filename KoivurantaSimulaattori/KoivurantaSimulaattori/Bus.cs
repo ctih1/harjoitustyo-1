@@ -3,6 +3,11 @@ using Jypeli;
 
 namespace KoivurantaSimulaattori;
 
+/// @author gr313123
+/// @version 12.11.2025
+/// <summary>
+/// Pelin bussi, joka sisältää metodeja bussin ohjausta varten.
+/// </summary>
 public class Bus
 {
     private readonly PhysicsObject bus;
@@ -32,6 +37,9 @@ public class Bus
     public double score;
     public double scoreMultiplier = 1.0;
     
+    /// <summary>
+    /// Luo bussi-objektin
+    /// </summary>
     public Bus()
     {
         logger.Info("Creating bus");
@@ -42,17 +50,19 @@ public class Bus
         gameUi = UI.GetInstance();
     }
 
+        
+    /// <summary>
+    /// Palauttaa bussin PhysicsObjektin
+    /// </summary>
     public PhysicsObject GetObject()
     {
         logger.Info("Returning bus");
         return this.bus;
     }
 
-    public void Forward()
-    {
-        Velocity += 0.07;
-    }
-
+    /// <summary>
+    /// Jarruttaa bussia
+    /// </summary>
     public void Brake()
     {
         logger.Debug("Breaking");
@@ -64,10 +74,11 @@ public class Bus
         {
             Velocity += 0.2;
         }
-        
     }
-
-
+    
+    /// <summary>
+    /// Laittaa käsijarrun päälle
+    /// </summary>
     public void Handbrake()
     {
         logger.Debug("Handbrake activated");
@@ -87,26 +98,40 @@ public class Bus
         }
     }
        
+    /// <summary>
+    /// Poistaa käsijarrun käytöstä
+    /// </summary>
     public void HandbrakeRelease()
     {
         logger.Debug("Handbrake released");
         handbrakePressed = false;
     }
 
+           
+    /// <summary>
+    /// Poistaa käsijarrun käytöstä
+    /// </summary>
+    /// <param name="temp">Bussin sisäinen lämpötila</param>
+    /// <returns>Palauttaa arvon (0-1) lämpötilasta aiheutuneesta vihaisuudesta</returns>
     private double CalculateHeatAnger(double temp)
     {
+        double index;
         if(temp >= 20)
         {
-            return Math.Pow(temperature - 20, 2) / 10.0 / 100;
-        } else
-        {
-            return -Math.Pow(temperature - 25, 3) / 100.0 / 100;
-        }
+            index = Math.Pow(temperature - 20, 2) / 10.0 / 100;
+        } 
+        
+        index = -Math.Pow(temperature - 25, 3) / 100.0 / 100;
+
+        return Math.Min(1, Math.Max(index, 0));
     }
+    
+    /// <summary>
+    /// Bussin päivitysfunktio, joka päivittää sen position, kulman, ja UI elementtejä
+    /// </summary>
     public void GameLoop()
     {
         Velocity += (ControllerTriggerGas*0.07);
-        // y=(x-0.1)^(((1)/(3)))
         TurningVelocity += (-ControllerStickRight.X)*0.28;
         if (TurningVelocity is < 0.15 and > -0.15) {
             TurningVelocity = 0;
@@ -160,8 +185,7 @@ public class Bus
         double totalAnger = Math.Max(0, heatHate + waitingAnger + generalAnger + speedAngerOffset);
         gameUi.UpdateAnger(totalAnger);
         gameUi.UpdateHates(heatHate, waitingAnger, generalAnger, speedAngerOffset);
-
-
+        
         if (totalAnger > 0.9)
         {
             scoreMultiplier = 0.4;
@@ -188,6 +212,9 @@ public class Bus
         bus.Angle = angle;
     }
 
+    /// <summary>
+    /// Asettaa bussin arvot takaisin oletuksiin. Käytetään pelin uudelleenkäynnistymisessä
+    /// </summary>
     public void Reset()
     {
         bus.Position = new Vector(0, 0);
@@ -199,37 +226,55 @@ public class Bus
         temperature = 20;
         backdoorOpen = false;
     }
-    public void Left()
+    
+    /// <summary>
+    /// Liikuttaa bussia vektorin suuntaan
+    /// </summary>
+    /// <param name="direction">Liikkumisen suunta</param>
+    public void Move(Vector direction)
     {
-        TurningVelocity += 0.21;
+        TurningVelocity += direction.X * -0.21;
+        Velocity += direction.Y * 0.07;
     }
 
-    public void Right()
-    {
-        TurningVelocity -= 0.21;
-    }
-
+    /// <summary>
+    /// Päästää ratista irti
+    /// </summary>
     public void SteeringRelease()
     {
         bus.StopAngular();
     }
 
+    /// <summary>
+    /// Liikuttaminen ohjaimen kanssa
+    /// </summary>
+    /// <param name="state">AnalogState, joka vastaa ohjaimen tikkua.</param>
     public void StickMove(AnalogState state)
     {
         ControllerStickRight = state.StateVector;
     }
 
+    /// <summary>
+    /// Kaasuttaminen ohjaimen kanssa
+    /// </summary>
+    /// <param name="state">AnalogState, joka vastaa ohjaimen triggerin arvoa.</param>
     public void TriggerAccel(AnalogState state)
     {
         ControllerTriggerGas = (state.State + 1) / 2.0;
     }
 
+    /// <summary>
+    /// Vaihtaa takaoven asentoa
+    /// </summary>
     public void ToggleBackdoor()
     {
         backdoorOpen = !backdoorOpen;
         gameUi.UpdateBackdoorStatus(backdoorOpen);
     }
 
+    /// <summary>
+    /// Nostaa bussin sisäistä lämpötilaa
+    /// </summary>
     public void IncreaseTemperature()
     {
         temperature = Math.Min(50, temperature + 1);
@@ -237,26 +282,44 @@ public class Bus
     }
 
 
+    /// <summary>
+    /// Laskee bussin sisäistä lämpötilaa
+    /// </summary>
     public void DecreaseTemperature()
     {
         temperature = Math.Max(0, temperature -1);
         gameUi.UpdateTemperature(temperature);
     }
 
+    /// <summary>
+    /// Asettaa yleisen raivoarvon
+    /// </summary>
     public void SetAnger(double anger)
     {
         this.generalAnger = Math.Max(0, Math.Min(anger, 0.7));
     }
 
+    /// <summary>
+    /// Nostaa yleistä raivoisuutta
+    /// </summary>
     public void IncreaseAnger(double amount)
     {
         SetAnger(this.generalAnger + amount);
     }
+    
+    /// <summary>
+    /// Laskee yleistä raivoisuutta
+    /// </summary>
     public void DecreaseAnger(double amount)
     {
         SetAnger(this.generalAnger - amount);
     }
 
+    
+    /// <summary>
+    /// Vaihtaa pisteitä
+    /// </summary>
+    /// /// <param name="amount">Muutoksen määrä. Jos miinusta, niin pisteet laskevat</param>
     public void ChangeScore(double amount)
     {
         score += amount * scoreMultiplier;

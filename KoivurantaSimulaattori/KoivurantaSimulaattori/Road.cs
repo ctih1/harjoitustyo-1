@@ -11,6 +11,11 @@ using System.Text.Json;
 
 namespace KoivurantaSimulaattori;
 
+/// @author gr313123
+/// @version 12.11.2025
+/// <summary>
+/// Pelin tie- ja pysäkkigenerointi. Hallitsee myös tiettyjä UI-osia
+/// </summary>
 public class Road
 {
     private static bool debug = false;
@@ -39,6 +44,9 @@ public class Road
 
     private int UpdateTick = 0;
 
+    /// <summary>
+    /// Generoi tien ja pysäkit
+    /// </summary>
     public void GenerateAll(KoivurantaSimulaattori game, Image roadSegmentTexture, Image leftTurn, Image rightTurn, Image stopArea, Image stopSign, Image person)
     {
         this.gameInstance = game;
@@ -70,7 +78,16 @@ public class Road
         return angle;
     }
 
-    public void GenerateRoad(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn, Image stopSign, Image stopZoneImage)
+    /// <summary>
+    /// Luo tien ja kyltit
+    /// </summary>
+    /// <param name="gameInstance">Pelin instance jota käytetään objektien lisäämiseen</param>
+    /// <param name="roadSegmentTexture">Tien tekstuuri</param>
+    /// <param name="leftTurn">Kyltti joka osoittaa käännöstä vasemmalle</param>
+    /// <param name="rightTurn">Kyltti joka osoittaa käännöstä oikealle</param>
+    /// <param name="stopSign">Bussin pysäkkimerkki</param>
+    /// <param name="stopZoneImage">Tien sisännys</param>
+    private void GenerateRoad(PhysicsGame gameInstance, Image roadSegmentTexture, Image leftTurn, Image rightTurn, Image stopSign, Image stopZoneImage)
     {
         logger.Info("Creating " + TERRAIN_PIECES + " road pieces");
         int currentRotation = 0;
@@ -254,7 +271,10 @@ public class Road
         return (stop, stopZone);
     }
 
-    public void GenerateStops(PhysicsGame instance, Image sign, Image zone, Image personImage)
+    /// <summary>
+    /// Luo pysäkit
+    /// </summary>
+    private void GenerateStops(PhysicsGame instance, Image sign, Image zone, Image personImage)
     {
         logger.Debug("Generating bus stop");
         HashSet<int> usedRoads = new HashSet<int>();
@@ -306,12 +326,12 @@ public class Road
         
     }
 
-    public bool Overlapping(double right, double left, double top, double down, GameObject comparison)
+    private bool Overlapping(double right, double left, double top, double down, GameObject comparison)
     {
         return right > comparison.Left && left < comparison.Right && top > comparison.Bottom && down < comparison.Top;
     }
 
-    public (GameObject, double) GetNextStopDistance()
+    private (GameObject, double) GetNextStopDistance()
     {
         GameObject nearest = stopZones[0];
         double distToNearest = busObject.Position.Distance(nearest.Position);
@@ -330,7 +350,10 @@ public class Road
         return (nearest, distToNearest);
     }
 
-    public void PhysicsUpdate(Camera Camera, ScreenView Screen)
+    /// <summary>
+    /// Päivittää pelin UI:n, sekä tarkistaa kollisioita bussin, pysäkkien ja teiden kanssa.
+    /// </summary>
+    public void PhysicsUpdate()
     {
         if (!loaded || bus == null) return;
         Stopwatch sw = Stopwatch.StartNew();
@@ -478,6 +501,9 @@ public class Road
         }
     }
 
+    /// <summary>
+    /// Asettaa bussin objektin
+    /// </summary>
     public void LoadBus(Bus bus)
     {
         logger.Debug("Loading bus");

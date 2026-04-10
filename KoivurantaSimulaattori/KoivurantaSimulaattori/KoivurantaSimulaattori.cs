@@ -9,6 +9,7 @@ namespace KoivurantaSimulaattori;
 /// @author gr313123
 /// @version 12.11.2025
 /// <summary>
+/// Peliluokka ja yleinen haltija muuttujille
 /// </summary>
 public class KoivurantaSimulaattori : PhysicsGame
 {
@@ -28,10 +29,12 @@ public class KoivurantaSimulaattori : PhysicsGame
     private Image busStop;
     private Image person;
 
+    /// <summary>
+    /// Asettaa pelin arvot ja lataa resurssit käynnistyessä
+    /// </summary>
     public override void Begin()
     {
         logger = new Logger("main");
-        logger.Debug("AUTA MINUA");
         roadTexture = VerboseImageLoad("road");
         leftSign = VerboseImageLoad("left");
         rightSign = VerboseImageLoad("right");
@@ -54,10 +57,10 @@ public class KoivurantaSimulaattori : PhysicsGame
         int stopIndex = 0;
         
         road.LoadBus(bus);
-        Keyboard.Listen(Key.W, ButtonState.Down, bus.Forward, "Drives forward");
-        Keyboard.Listen(Key.A, ButtonState.Down, bus.Left, "Steer left");
+        Keyboard.Listen(Key.W, ButtonState.Down, bus.Move, "Drives forward", new Vector(0, 1));
+        Keyboard.Listen(Key.A, ButtonState.Down, bus.Move, "Steer left", new Vector(-1 ,0));
         Keyboard.Listen(Key.S, ButtonState.Down, bus.Brake, "Brake");
-        Keyboard.Listen(Key.D, ButtonState.Down, bus.Right, "Steer right");
+        Keyboard.Listen(Key.D, ButtonState.Down, bus.Move, "Steer right", new Vector(1, 0));
         Keyboard.Listen(Key.D, ButtonState.Released, bus.SteeringRelease, "Steer right");
         Keyboard.Listen(Key.A, ButtonState.Released, bus.SteeringRelease, "Steer right");
         Keyboard.Listen(Key.F, ButtonState.Released, bus.ToggleBackdoor, "Lets people leave the bus");
@@ -122,6 +125,10 @@ public class KoivurantaSimulaattori : PhysicsGame
         scoreList = scoreList ?? new ScoreList(10, true, 0);
 
     }
+    
+    /// <summary>
+    /// Näyttää highscore listan, kysyy nimeä, ja tallentaa pisteet
+    /// </summary>
     public void ShowHighscoreList()
     {
         if (highScoreOpen) return;
@@ -143,7 +150,7 @@ public class KoivurantaSimulaattori : PhysicsGame
     protected override void Update(Time time)
     {
         Stopwatch sw = Stopwatch.StartNew();
-        road.PhysicsUpdate(Camera, Screen);
+        road.PhysicsUpdate();
         base.Update(Time);
         bus.GameLoop();
         sw.Stop();

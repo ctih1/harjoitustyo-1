@@ -29,14 +29,4 @@ public class Logger
     {
         Output("info", message);
     }
-
-    public void Warn(string message)
-    {
-        Output("warn", message);
-    }
-
-    public void Error(string message)
-    {
-        Output("error", message);
-    }
 }
