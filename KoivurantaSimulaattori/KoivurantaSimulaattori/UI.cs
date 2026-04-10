@@ -385,7 +385,7 @@ public class UI
         UpdateLine(waitHateBar, 100, wait);
         waitHateBar.Color = GetRangeColor(wait);
 
-        UpdateLine(heatHateBar, 100, heat);
+        UpdateLine(heatHateBar, 100, Math.Min(1, heat));
         heatHateBar.Color = GetRangeColor(heat);
 
         UpdateLine(generalHateBar, 100, normal);

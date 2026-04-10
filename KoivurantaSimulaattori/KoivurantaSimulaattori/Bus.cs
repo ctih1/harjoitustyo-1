@@ -111,6 +111,7 @@ public class Bus
         return bus;
     }
 
+    
     /// <summary>
     /// Jarruttaa bussia
     /// </summary>
@@ -127,6 +128,7 @@ public class Bus
         }
     }
 
+    
     /// <summary>
     /// Laittaa käsijarrun päälle
     /// </summary>
@@ -149,6 +151,7 @@ public class Bus
         }
     }
 
+    
     /// <summary>
     /// Poistaa käsijarrun käytöstä
     /// </summary>
@@ -179,6 +182,7 @@ public class Bus
         return Math.Min(1, Math.Max(index, 0));
     }
 
+    
     /// <summary>
     /// Bussin päivitysfunktio, joka päivittää sen position, kulman, ja UI elementtejä
     /// </summary>
@@ -277,6 +281,7 @@ public class Bus
         bus.Angle = angle;
     }
 
+    
     /// <summary>
     /// Asettaa bussin arvot takaisin oletuksiin. Käytetään pelin uudelleenkäynnistymisessä
     /// </summary>
@@ -292,6 +297,7 @@ public class Bus
         backdoorOpen = false;
     }
 
+    
     /// <summary>
     /// Liikuttaa bussia vektorin suuntaan
     /// </summary>
@@ -302,6 +308,7 @@ public class Bus
         velocity += direction.Y * 0.07;
     }
 
+    
     /// <summary>
     /// Päästää ratista irti
     /// </summary>
@@ -310,6 +317,7 @@ public class Bus
         bus.StopAngular();
     }
 
+    
     /// <summary>
     /// Liikuttaminen ohjaimen kanssa
     /// </summary>
@@ -319,6 +327,7 @@ public class Bus
         controllerStickRight = state.StateVector;
     }
 
+    
     /// <summary>
     /// Kaasuttaminen ohjaimen kanssa
     /// </summary>
@@ -328,6 +337,7 @@ public class Bus
         controllerTriggerGas = (state.State + 1) / 2.0;
     }
 
+    
     /// <summary>
     /// Vaihtaa takaoven asentoa
     /// </summary>
@@ -337,6 +347,7 @@ public class Bus
         gameUi.UpdateBackdoorStatus(backdoorOpen);
     }
 
+    
     /// <summary>
     /// Nostaa bussin sisäistä lämpötilaa
     /// </summary>
@@ -356,6 +367,7 @@ public class Bus
         gameUi.UpdateTemperature(temperature);
     }
 
+    
     /// <summary>
     /// Asettaa yleisen raivoarvon
     /// </summary>
@@ -364,6 +376,7 @@ public class Bus
         generalAnger = Math.Max(0, Math.Min(anger, 0.7));
     }
 
+    
     /// <summary>
     /// Nostaa yleistä raivoisuutta
     /// </summary>
@@ -372,6 +385,7 @@ public class Bus
         SetAnger(generalAnger + amount);
     }
 
+    
     /// <summary>
     /// Laskee yleistä raivoisuutta
     /// </summary>

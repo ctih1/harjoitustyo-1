@@ -146,11 +146,13 @@ public class KoivurantaSimulaattori : PhysicsGame
         highScoreOpen = true;
     }
 
+    
     private void SaveScores()
     {
         DataStorage.Save(scoreList, "scoreList.xml");
     }
 
+    
     protected override void Update(Time time)
     {
         Stopwatch sw = Stopwatch.StartNew();
